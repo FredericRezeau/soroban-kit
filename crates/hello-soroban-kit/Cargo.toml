@@ -1,0 +1,27 @@
+[package]
+name = "hello-soroban-kit"
+version = "0.1.1"
+edition = "2021"
+authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
+description = "Demo soroban smart contract for soroban-kit."
+repository = "https://github.com/fredericrezeau/soroban-kit"
+keywords = ["soroban", "stellar", "blockchain", "smart-contract"]
+license-file = "LICENSE"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+soroban-sdk = "20.0.0-rc2.2"
+
+[dependencies.soroban-macros]
+path = "../soroban-macros"
+version = "0.1.1"
+features = ["storage"]
+
+[dependencies.soroban-tools]
+path = "../soroban-tools"
+version = "0.1.1"
+
+[dev_dependencies]
+soroban-sdk = { version = "20.0.0-rc2.2", features = ["testutils"] }
