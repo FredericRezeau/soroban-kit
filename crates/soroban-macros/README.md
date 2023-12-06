@@ -21,7 +21,7 @@ When dealing with the Soroban storage, repetitive boilerplate code is typically 
     fn set_user_data(key: &userKey, data: &UserData)    
 ```
 
-The `storage` macros streamline this process by automatically generating the boilerplate code, enforcing type rules at compile time, binding the storage with custom data types and optionally, applying Trait constraints on storage keys.
+The `storage` macros streamline this process by automatically generating the boilerplate code, enforcing type rules at compile time, binding the storage with custom data types and optionally, applying Trait constraints to storage keys.
 
 ### Usage
 

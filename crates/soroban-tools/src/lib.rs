@@ -17,7 +17,7 @@
 ///
 /// The `impl_storage!` macro streamlines this process by automatically generating the boilerplate
 /// code, enforcing type rules at compile time, binding the storage with custom data types and
-/// optionally, applying Trait constraints on storage keys.
+/// optionally, applying Trait constraints to storage keys.
 ///
 /// # Usage
 #[cfg_attr(

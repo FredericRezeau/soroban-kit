@@ -28,7 +28,7 @@
 //!
 //! These macros streamline this process by automatically generating the boilerplate
 //! code, enforcing type rules at compile time, binding the storage with custom data types and
-//! optionally, applying Trait constraints on storage keys with `key_constraint`.
+//! optionally, applying Trait constraints to storage keys with `key_constraint`.
 //!
 //! # Usage
 #[cfg_attr(
