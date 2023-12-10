@@ -10,15 +10,15 @@ This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-ki
 
 ## Commands
 
-3. Building the Contract:
+1. Building the Contract:
    ```sh
    soroban contract build
    ```
-1. Running Tests:
+2. Running Tests:
    ```sh
    cargo test -- --nocapture
    ```
-4. Deploying to Testnet:
+3. Deploying to Testnet:
    
    ```sh
    soroban contract deploy --wasm target/wasm32-unknown-unknown/release/hello_soroban_kit.wasm --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" --source ACCOUNT
@@ -26,7 +26,7 @@ This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-ki
     ```sh
    output > CONTRACT_ID
    ```
-5. Invoking the contract:
+4. Invoking the contract:
    
    ```sh
    soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- hello --newcomer TESTER
@@ -34,6 +34,8 @@ This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-ki
    ```sh
    output > ["Hello","TESTER"]
    ```
+5. Check out [test.rs](src/test.rs) for more detailed integration examples.
+   
 
 ## Contributing
 

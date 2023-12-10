@@ -6,8 +6,55 @@
 
 This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-kit) which provides fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development. All modules in Rust crates are [feature flagged](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section), compile just what you need and nothing more!
 
-`soroban-macros` provides a collection of procedural macros designed to streamline development for Soroban smart contracts.
+`soroban-macros` provide a collection of procedural macros designed to streamline development for Soroban smart contracts.
 
+- [soroban-macros](#soroban-macros)
+  - [State Machine Macro](#state-machine-macro)
+    - [Background](#background)
+    - [Usage](#usage)
+  - [Storage Macros](#storage-macros)
+    - [Background](#background-1)
+    - [Usage](#usage-1)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Contact](#contact)
+
+## State Machine Macro
+
+The `state-machine` attribute macro can be used to implement versatile state machines in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
+
+### Background
+
+While state machines are a prevalent behavioral pattern in Solidity smart contracts, their implementation is often limited due to Solidity rigid architecture leading to complexities, and sometimes impossibilities, in implementing concurrency and runtime behaviors.
+
+Leveraging Rust advanced type system, soroban-kit `state-machine` can handle complex interactions and concurrent state executions, enabling a flexible, yet straightforward state machine solution for Soroban smart contracts.
+
+### Usage
+
+`#[state-machine]` named arguments:
+- `state`: StatePath := EnumName ":" VariantName [":" TupleValue]
+- `region`: RegionPath := EnumName ":" VariantName [":" TupleValue]
+- `transition`: true | false
+- `storage`: instance | persistent | temporary
+
+```rust
+    // Example.
+    #[state_machine(
+        state = "State:Registered:user",
+        region = "Role:Admin:user",
+        transition = true,
+        storage = "instance",
+    )]
+    fn function(...)
+```
+
+Check out the integration tests [Gaming Lobby](/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](/crates/hello-soroban-kit/src/test.rs) state machine examples for detailed usage.
+
+Cargo.toml:
+```toml
+[dependencies]
+soroban-macros = { version = "0.1.2", features = ["state-machine"] }
+```
 ## Storage Macros
 
 `storage` and `key_constraint` generate a minimal wrapper for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
@@ -25,51 +72,35 @@ The `storage` macros streamline this process by automatically generating the boi
 
 ### Usage
 
-Cargo.toml:
-```toml
-[dependencies]
-soroban-macros = { version = "0.1.1", features = ["storage"] }
-```
-
-Bind the Soroban Instance storage to your custom contract type.
+`#[storage]` positional arguments:
+- `Storage`: Instance | Persistent | Temporary
+- `Key`: Trait
 
 ```rust
-    use soroban_macros::{storage, key_constraint};
- 
-    // Implement the desired storage for your custom contract type.
-    #[contracttype]
-    #[storage(Instance)] // e.g., Instance storage binding.
-    pub struct CustomType {
-        pub token: Address,
-    }
-```
-Now you have access to type-safe operations for managing CustomType with the Soroban instance storage via `soroban-tools` (also part of the `soroban-kit`).
-
-```rust
-    use soroban_tools::storage;
-
-    // e.g., Retrieve the data from instance storage.
-    let data = storage::get(&env, &key);
-```
-Optional. `key_constraint` allows you to express compile-time restrictions ensuring that only specific keys can be used with a storage-type binding:
-
-```rust
-    // Set up AdminKeyConstraint for AdminKey
-    #[contracttype]  
-    #[key_constraint(AdminKeyConstraint)]
-    pub enum AdminKey {
-        Admin,
-    }
-
-    // Apply it to the AdminData x Instance binding.
-    #[contracttype]
+    // Example.
     #[storage(Instance, AdminKeyConstraint)]
     pub struct AdminData {
         pub address: Address,
     }
+```
 
-    // The compiler will generate an error if the code attempts to use
-    // AdminData storage with a key that does not satisfy AdminKeyConstraint.
+`#[key_constraint]` positional arguments:
+- `Key`: Trait
+
+```rust
+    // Example.
+    #[key_constraint(AdminKeyConstraint)]
+    pub enum Key {
+        Admin,
+    }
+```
+
+Check out the [Storage](/crates/soroban-macros/tests/state-machine-tests.rs) integration tests and [Hello](/crates/hello-soroban-kit/src/test.rs) smart contract examples for detailed usage.
+
+Cargo.toml:
+```toml
+[dependencies]
+soroban-macros = { version = "0.1.2", features = ["storage"] }
 ```
 
 ## Contributing

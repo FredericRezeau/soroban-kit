@@ -6,7 +6,51 @@
 
 This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-kit) which provides fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development. All modules in Rust crates are [feature flagged](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section), compile just what you need and nothing more!
 
+`soroban-tools` provide a collection of tools, functions and macros designed to streamline development for Soroban smart contracts.
+
+- [soroban-tools](#soroban-tools)
+  - [Modules](#modules)
+    - [State Machine](#state-machine)
+      - [Background](#background)
+      - [Usage](#usage)
+    - [Storage](#storage)
+      - [Background](#background-1)
+      - [Usage](#usage-1)
+      - [Testing notes](#testing-notes)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Contact](#contact)
+
 ## Modules
+
+### State Machine
+
+The `fsm` (finite state machine) module exports the `impl_state_machine!` declarative macro which can be used to implement versatile state machines in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
+
+#### Background
+
+While state machines are a prevalent behavioral pattern in Solidity smart contracts, their implementation is often limited due to Solidity rigid architecture leading to complexities, and sometimes impossibilities, in implementing concurrency and runtime behaviors.
+
+Leveraging Rust advanced type system, soroban-kit `impl_state_machine!` can handle complex interactions and concurrent state executions, enabling a flexible, yet straightforward state machine solution for Soroban smart contracts.
+
+#### Usage
+
+```rust
+    // Example.
+    soroban_tools::impl_state_machine!(
+        env,
+        fsm::StorageType::Instance,
+        State, Idle, (), Region, All, ()
+    );
+```
+
+Check out the integration tests [Gaming Lobby](/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](/crates/hello-soroban-kit/src/test.rs) state machine examples for detailed usage.
+
+Cargo.toml:
+```toml
+[dependencies]
+soroban-tools = { version = "0.1.2", features = ["state-machine"] }
+```
 
 ### Storage
 
@@ -25,17 +69,7 @@ The `storage` macros streamline this process by automatically generating the boi
 
 #### Usage
 
-Cargo.toml:
-```toml
-[dependencies]
-soroban-tools = { version = "0.1.1", features = ["storage"] }
-```
-
-Example usage:
-
 ```rust
-     use soroban_tools::{impl_storage, impl_key_constraint, storage};
- 
      #[contracttype]
      pub enum Key {
          User(Address),
@@ -50,25 +84,6 @@ Example usage:
       // for any custom contract type.
       // e.g., Bind the Soroban instance storage to CustomType.
       impl_storage!(Instance, CustomType); 
-
-      // You now have access to type-safe operations for managing
-      // CustomType with the Soroban instance storage.
- 
-      // e.g., Set the data to instance storage.
-      let data = CustomType { token: Address::random(&env) };
-      let key = Key::User(Address::random(&env));      
-      storage::set(&env, &key, &data);
-
-      // e.g., Retrieve the data from instance storage.
-      let data = storage::get(&env, &key);
-
-      // e.g., Retrieve the data with a closure.
-      let data = storage::get_or_else(&env, &key, |opt| opt.unwrap_or_else(|| default_value()));
-
-      // e.g., Call has(), bump() and remove() with type inference syntax.
-      storage::has::<Key, CustomType>(&env, &key);
-      storage::bump::<Key, CustomType>(&env, &key, 1, 1);
-      storage::remove::<Key, CustomType>(&env, &key);
 ```
 
 Optional. The `impl_key_constraint!` macro allows you to express compile-time restrictions ensuring that only specific key traits can be used with a storage-type binding:
@@ -83,12 +98,20 @@ Optional. The `impl_key_constraint!` macro allows you to express compile-time re
       // storage does not satisfy AdminKeyConstraint.
 ```
 
-### Testing notes
+Check out the [Storage](/crates/soroban-macros/tests/state-machine-tests.rs) integration tests and [Hello](/crates/hello-soroban-kit/src/test.rs) smart contract examples for detailed usage.
+
+Cargo.toml:
+```toml
+[dependencies]
+soroban-tools = { version = "0.1.2", features = ["storage"] }
+```
+#### Testing notes
 
 1. You can run tests with mock-storage feature enabled outside of Soroban environment:
    ```sh
    cargo test --features mock-storage
    ```
+
 ## Contributing
 
 Contributions are welcome! If you have a suggestion that would make this better, please fork the repo and create a pull request.

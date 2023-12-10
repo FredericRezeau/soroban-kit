@@ -1,6 +1,6 @@
 [package]
 name = "soroban-tools"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development."
@@ -22,6 +22,7 @@ soroban-sdk = "=20.0.0-rc2.2"
 soroban-sdk = { version = "=20.0.0-rc2.2", features = ["testutils"] }
 
 [features]
-default = ["storage"]
+default = ["storage", "state-machine"]
 storage = []
+state-machine = []
 mock-storage = ["storage"]

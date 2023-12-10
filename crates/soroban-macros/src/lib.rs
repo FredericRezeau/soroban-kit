@@ -8,7 +8,30 @@
 
 //! A collection of procedural macros designed to streamline development for Soroban
 //! smart contracts.
-
+//! 
+//! ##State Machine
+//! 
+//! The `state-machine` attribute macro can be used to implement versatile state machines
+//! in Soroban smart contracts. It features state concurrency through regions, runtime behavior
+//! modeling via extended state variables, transition control with guards and effects,
+//! and state persistence with Soroban storage.
+//!
+//! ### Background
+//!
+//! While state machines are a prevalent behavioral pattern in Solidity smart contracts, their
+//! implementation is often limited due to Solidity rigid architecture leading to complexities,
+//! and sometimes impossibilities, in implementing concurrency and runtime behaviors.
+//! 
+//! Leveraging Rust advanced type system, soroban-kit `state-machine` can handle more complex interactions
+//! and concurrent state executions, enabling a flexible, yet straightforward state machine solution
+//! for Soroban smart contracts.
+//! 
+//! ### Usage
+//! 
+//! Check out the `game lobby` and `coffee machine` examples for detailed usage:
+//! soroban-kit/crates/soroban-macros/tests/state-machine-tests.rs
+//! soroban-kit/crates/hello-soroban-kit/src/tests.rs
+//!
 //! ##Storage
 //! 
 //! The `storage` and `key_constraint` macros can be used to implement type safety
@@ -18,7 +41,7 @@
 //! For performance, the code generates a minimal wrapper that handles key and data operations
 //! without duplication, leveraging Rust lifetimes for safe borrowing.
 //!
-//! # Background
+//! ### Background
 //!
 //! When dealing with the Soroban storage, repetitive boilerplate code is typically required
 //! for encapsulation and type safety over generic storage functions.
@@ -29,60 +52,30 @@
 //! These macros streamline this process by automatically generating the boilerplate
 //! code, enforcing type rules at compile time, binding the storage with custom data types and
 //! optionally, applying Trait constraints to storage keys with `key_constraint`.
-//!
-//! # Usage
-#[cfg_attr(
-    feature = "include_doctests",
-    doc = r#"
-//!   ```rust,ignore
 //! 
-//!      use soroban_macros::{storage, key_constraint};
+//! ### Usage
 //! 
-//!      // Key constraints are compile-time restrictions ensuring
-//!      // that only specific key types can be used with the storage.
-//!      #[key_constraint(AdminKeyConstraint)]
-//!      #[contracttype]
-//!      pub enum Key {
-//!          User(Address),
-//!      }
-//! 
-//!      // Use the `storage` macro to implement the desired storage for any custom contract type.
-//!      // Example: Implementing Soroban Instance storage for CustomType
-//!      #[storage(Instance)]
-//!      // #[storage(Instance, AdminKeyConstraint)]  // Optionally apply the constraint.
-//!      #[contracttype]
-//!      pub struct CustomType {
-//!          pub token: Address,
-//!      }
-//! 
-//!      // You now have access to type-safe operations encapsulating
-//!      // the instance storage, binding with CustomType.
-//! 
-//!      let key = Key::User(Address::random(&env)); 
-//!      // Example: Set data.
-//!      storage::set::<Key, CustomType>(&env, &key, &CustomType { token: Address::random(&env) });
-//!      // Example: Get data.
-//!      storage::get::<Key, CustomType>(&env, &key);
-//!      // Example: Get data with error tolerance.
-//!      storage::get_or_else::<Key, CustomType, _, _>(&env, &key, |opt| opt.unwrap_or_else(|| default_value()));
-//!      // Example: Checking that data exists.
-//!      storage::has::<Key, CustomType>(&env, &key);
-//!      // Example: Bumping data lifetime.
-//!      storage::bump::<Key, CustomType>(&env, &key, 1, 1);
-//!      // Example: Deleting the data.
-//!      storage::remove::<Key, CustomType>(&env, &key);
-//!   ```
-"#
-)]
+//! Check out the integration tests for detailed usage:
+//! soroban-kit/crates/soroban-macros/tests/storage-tests.rs
 
 extern crate proc_macro;
 
 #[allow(unused_imports)]
 use proc_macro::TokenStream;
 
+/// State machine procedural macros implementation.
+#[cfg(feature = "state-machine")]
+mod fsm;
+
 /// Storage procedural macros implementation.
 #[cfg(feature = "storage")]
 mod storage;
+
+#[cfg(feature = "state-machine")]
+#[proc_macro_attribute]
+pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
+    fsm::state_machine(attr, item)
+}
 
 #[cfg(feature = "storage")]
 #[proc_macro_attribute]
@@ -95,4 +88,3 @@ pub fn storage(attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn key_constraint(attr: TokenStream, item: TokenStream) -> TokenStream {
     storage::key_constraint(attr, item)
 }
-

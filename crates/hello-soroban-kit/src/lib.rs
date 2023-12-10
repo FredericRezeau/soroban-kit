@@ -7,9 +7,16 @@
 */
 
 #![no_std]
-use soroban_macros::{key_constraint, storage};
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, vec, Env, Symbol, Vec};
-use soroban_tools::storage;
+use soroban_sdk::{
+    contract, contractimpl, contracttype, symbol_short, vec, Address, Env, IntoVal, Symbol,
+    TryFromVal, Val, Vec,
+};
+
+use soroban_macros::{key_constraint, state_machine, storage};
+use soroban_tools::{
+    fsm::{StateMachine, TransitionHandler},
+    storage,
+};
 
 // Optional but recommended.
 // Use `key_constraint` to apply a constraint to the Key
@@ -54,6 +61,70 @@ impl Contract {
         let stored_newcomer = storage::get(&env, &key).unwrap().newcomer;
 
         vec![&env, symbol_short!("Hello"), stored_newcomer]
+    }
+
+    pub fn run_state_machine(env: Env, user: Address) {
+
+        // This is just a quick state-machine setup demo
+
+        // For more complete state-machine examples check:
+        // - Gaming lobby example: `crates/soroban-macros/tests/state-machine-tests.rs` in soroban-macros integration tests.
+        // - Coffee machine example: `crates/hello-soroban-kit/src/test.rs`
+
+        // Declare the state machine.
+        struct MyStateMachine;
+
+        // Declare the states
+        #[contracttype]
+        #[derive(Clone, Debug, Eq, PartialEq)]
+        pub enum State {
+            Opened,
+            Running(Address),
+            Closed,
+        }
+
+        // Declare the regions.
+        #[contracttype]
+        #[derive(Clone, Debug, Eq, PartialEq)]
+        pub enum Region {
+            Global,
+            Specific(Address),
+        }
+
+        // Implement the TransitionHandler trait for MyStateMachine.
+        impl<K, V> TransitionHandler<K, V> for MyStateMachine
+        where
+            K: IntoVal<Env, Val> + TryFromVal<Env, Val>,
+            V: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val> + Into<State>,
+        {
+            fn on_guard(&self, _env: &Env, _state_machine: &soroban_tools::fsm::StateMachine<K, V>) {}
+            fn on_effect(&self, _env: &Env, _state_machine: &soroban_tools::fsm::StateMachine<K, V>) {}
+        }
+
+        // Implement MyStateMachine, use the #[state_machine] attribute to
+        // declare your state machine functions.
+        impl MyStateMachine {
+            #[state_machine(
+                state = "State:Running:user",
+                region = "Region:Specific:user",
+                transition = true,
+                storage = "temporary"
+            )]
+            fn run(&self, env: &Env, user: &Address) {
+            }
+
+            fn init(&self, env: &Env, user: &Address) {
+                let region = Region::Specific(user.clone());
+                let state_machine =
+                    StateMachine::<Region, State>::new(&region, soroban_tools::fsm::StorageType::Temporary);
+                state_machine.set_state(&env, State::Running(user.clone()));
+            }
+        }
+
+        // Run it.
+        let state_machine = MyStateMachine;
+        state_machine.init(&env, &user);
+        state_machine.run(&env, &user);
     }
 }
 

@@ -8,13 +8,17 @@ Fast, lightweight functions and macros with lean, targeted functionality for Sor
 
 - [soroban-kit](#soroban-kit)
   - [soroban-macros crate](#soroban-macros-crate)
-    - [Storage Macros](#storage-macros)
+    - [State Machine Macro](#state-machine-macro)
       - [Background](#background)
-      - [Usage](#usage)
+      - [Documentation](#documentation)
+    - [Storage Macros](#storage-macros)
+      - [Background](#background-1)
+      - [Documentation](#documentation-1)
   - [soroban-tools crate](#soroban-tools-crate)
+    - [State Machine Module](#state-machine-module)
+      - [Documentation](#documentation-2)
     - [Storage Module](#storage-module)
-      - [Usage](#usage-1)
-    - [Testing notes](#testing-notes)
+      - [Documentation](#documentation-3)
   - [hello-soroban-kit contract](#hello-soroban-kit-contract)
   - [Contributing](#contributing)
   - [License](#license)
@@ -22,9 +26,21 @@ Fast, lightweight functions and macros with lean, targeted functionality for Sor
 
 ## soroban-macros crate
 
-[Complete soroban-macros documentation](crates/soroban-macros/)
+A collection of procedural macros designed to streamline development for Soroban smart contracts. Read the [documentation](crates/soroban-macros/).
 
-A collection of procedural macros designed to streamline development for Soroban smart contracts.
+### State Machine Macro
+
+The `state-machine` attribute macro can be used to implement versatile state machines in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
+
+#### Background
+
+While state machines are a prevalent behavioral pattern in Solidity smart contracts, their implementation is often limited due to Solidity rigid architecture leading to complexities, and sometimes impossibilities, in implementing concurrency and runtime behaviors.
+
+Leveraging Rust advanced type system, soroban-kit `state-machine` can handle complex interactions and concurrent state executions, enabling a flexible, yet straightforward state machine solution for Soroban smart contracts.
+
+#### Documentation
+
+Make sure you check out the [Gaming Lobby](/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](/crates/hello-soroban-kit/src/test.rs) state machines examples. Complete documentation can be found in the `soroban-macros` [README](crates/soroban-macros/README.md).
 
 ### Storage Macros
 
@@ -41,93 +57,34 @@ When dealing with the Soroban storage, repetitive boilerplate code is typically 
 
 The `storage` macros streamline this process by automatically generating the boilerplate code, enforcing type rules at compile time, binding the storage with custom data types and optionally, applying Trait constraints to storage keys.
 
-#### Usage
+#### Documentation
 
-Cargo.toml:
-```toml
-[dependencies]
-soroban-macros = { version = "0.1.1", features = ["storage"] }
-```
-
-Bind the Soroban Instance storage to your custom contract type.
-
-```rust
-    use soroban_macros::{storage, key_constraint};
- 
-    // Implement the desired storage for your custom contract type.
-    #[contracttype]
-    #[storage(Instance)] // e.g., Instance storage binding.
-    pub struct CustomType {
-        pub token: Address,
-    }
-```
-Now you have access to type-safe operations for managing CustomType with the Soroban instance storage.
-
-```rust
-    use soroban_tools::storage;
-
-    // e.g., Set the data to instance storage.
-    let data = CustomType { token: Address::random(&env) };
-    let key = Key::User(Address::random(&env));      
-    storage::set(&env, &key, &data);
-
-    // e.g., Retrieve the data from instance storage.
-    let data = storage::get(&env, &key);
-
-    // e.g., Retrieve the data with a closure.
-    let data = storage::get_or_else(&env, &key, |opt| opt.unwrap_or_else(|| default_value()));
-
-    // e.g., Call has(), bump() and remove() with type inference syntax.
-    storage::has::<Key, CustomType>(&env, &key);
-    storage::bump::<Key, CustomType>(&env, &key, 1, 1);
-    storage::remove::<Key, CustomType>(&env, &key);
-```
-Optional. `key_constraint` allows you to express compile-time restrictions ensuring that only specific keys can be used with a storage-type binding:
-
-```rust
-    // Set up AdminKeyConstraint for AdminKey
-    #[contracttype]  
-    #[key_constraint(AdminKeyConstraint)]
-    pub enum AdminKey {
-        Admin,
-    }
-
-    // Apply it to the AdminData x Instance binding.
-    #[contracttype]
-    #[storage(Instance, AdminKeyConstraint)]
-    pub struct AdminData {
-        pub address: Address,
-    }
-
-    // The compiler will generate an error if the code attempts to use
-    // AdminData storage with a key that does not satisfy AdminKeyConstraint.
-```
+Documentation and usage examples can be found in the `soroban-macros` [README](crates/soroban-macros/README.md).
 
 ## soroban-tools crate
 
-[Complete soroban-tools documentation](crates/soroban-tools/)
+### State Machine Module
+
+The `fsm` (finite state machine) module exports the `impl_state_machine!` macro which is essentially the declarative version of the procedural macro exported from the `soroban-macros` crate.
+
+#### Documentation
+
+Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools/README.md).
 
 ### Storage Module
 
 The `storage` module exports the `impl_storage!` and `impl_key_constraint!` macros which are essentially the declarative versions of the procedural macros exported from the `soroban-macros` crate.
 
-#### Usage
+#### Documentation
 
-Detailed usage and documentation can be found in the `soroban-tools` [README.md](crates/soroban-tools/README.md).
+Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools/README.md).
 
-
-### Testing notes
-
-1. You can run tests with mock-storage feature enabled outside of Soroban environment:
-   ```sh
-   cargo test --features mock-storage
-   ```
 
 ## hello-soroban-kit contract
 
-[Complete hello-soroban-kit documentation](crates/hello-soroban-kit/)
+A simple Soroban smart contract example showcasing the use of `soroban-tools` and `soroban-macros`.
 
-A simple Soroban smart contract example showcasing the use of `soroban-tools` and `soroban-macros`. 
+Read [hello-soroban-kit documentation](crates/hello-soroban-kit/).
 
 ## Contributing
 
