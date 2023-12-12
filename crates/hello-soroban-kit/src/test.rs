@@ -143,8 +143,8 @@ impl TestContract {
         // soroban-kit FSM allows modeling complex concurrency behaviors
         // with regions and extended state variables.
 
-        let buyer1 = Address::random(&env);
-        let buyer2 = Address::random(&env);
+        let buyer1 = Address::generate(&env);
+        let buyer2 = Address::generate(&env);
         let coffee_machine = CoffeeMachine;
 
         // Set the initial state to Refilled.

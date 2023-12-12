@@ -79,7 +79,7 @@ pub trait StorageOps<T> {
     fn set(&self, env: &Env, data: &T);
     fn remove(&self, env: &Env);
     fn has(&self, env: &Env) -> bool;
-    fn bump(&self, env: &Env, low_expiration_watermark: u64, hi_expiration_watermark: u64);
+    fn extend_ttl(&self, env: &Env, threshold: u32, extend_to: u32);
 }
 
 pub fn get<'a, K, T>(env: &Env, key: &'a K) -> Option<T>
@@ -123,16 +123,16 @@ where
     StorageProxy::<'a, K, T>::new(key).remove(env);
 }
 
-pub fn bump<'a, K, T>(
+pub fn extend_ttl<'a, K, T>(
     env: &Env,
     key: &'a K,
-    low_expiration_watermark: u64,
-    hi_expiration_watermark: u64,
+    threshold: u32,
+    extend_to: u32,
 ) where
     StorageProxy<'a, K, T>: StorageOps<T>,
     K: IntoVal<Env, Val> + TryFromVal<Env, Val> + ?Sized,
 {
-    StorageProxy::<'a, K, T>::new(key).bump(env, low_expiration_watermark, hi_expiration_watermark);
+    StorageProxy::<'a, K, T>::new(key).extend_ttl(env, threshold, extend_to);
 }
 
 #[macro_export]
@@ -172,11 +172,11 @@ macro_rules! impl_storage {
                 $crate::storage::with_instance_storage(env, |storage| storage.has(self.get_key()))
             }
 
-            fn bump(&self, env: &Env, low_expiration_watermark: u64, hi_expiration_watermark: u64) {
+            fn extend_ttl(&self, env: &Env, threshold: u32, extend_to: u32) {
                 $crate::storage::with_instance_storage(env, |storage| {
-                    storage.bump(
-                        low_expiration_watermark as u32,
-                        hi_expiration_watermark as u32,
+                    storage.extend_ttl(
+                        threshold,
+                        extend_to,
                     )
                 });
             }
@@ -209,12 +209,12 @@ macro_rules! impl_storage {
                 $crate::storage::with_persistent_storage(env, |storage| storage.has(self.get_key()))
             }
 
-            fn bump(&self, env: &Env, low_expiration_watermark: u64, hi_expiration_watermark: u64) {
+            fn extend_ttl(&self, env: &Env, threshold: u32, extend_to: u32) {
                 $crate::storage::with_persistent_storage(env, |storage| {
-                    storage.bump(
+                    storage.extend_ttl(
                         self.get_key(),
-                        low_expiration_watermark as u32,
-                        hi_expiration_watermark as u32,
+                        threshold,
+                        extend_to,
                     )
                 });
             }
@@ -247,12 +247,12 @@ macro_rules! impl_storage {
                 $crate::storage::with_temporary_storage(env, |storage| storage.has(self.get_key()))
             }
 
-            fn bump(&self, env: &Env, low_expiration_watermark: u64, hi_expiration_watermark: u64) {
+            fn extend_ttl(&self, env: &Env, threshold: u32, extend_to: u32) {
                 $crate::storage::with_temporary_storage(env, |storage| {
-                    storage.bump(
+                    storage.extend_ttl(
                         self.get_key(),
-                        low_expiration_watermark as u32,
-                        hi_expiration_watermark as u32,
+                        threshold,
+                        extend_to,
                     )
                 });
             }

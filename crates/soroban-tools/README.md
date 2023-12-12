@@ -49,7 +49,7 @@ Check out the integration tests [Gaming Lobby](https://github.com/FredericRezeau
 Cargo.toml:
 ```toml
 [dependencies]
-soroban-tools = { version = "0.1.2", features = ["state-machine"] }
+soroban-tools = { version = "0.1.3", features = ["state-machine"] }
 ```
 
 ### Storage
@@ -103,7 +103,7 @@ Check out the [Storage](https://github.com/FredericRezeau/soroban-kit/blob/maste
 Cargo.toml:
 ```toml
 [dependencies]
-soroban-tools = { version = "0.1.2", features = ["storage"] }
+soroban-tools = { version = "0.1.3", features = ["storage"] }
 ```
 #### Testing notes
 

@@ -58,7 +58,7 @@ impl MockStorageInstance {
     {
     }
 
-    pub fn bump(&self, _low_expiration_watermark: u32, _high_expiration_watermark: u32) {}
+    pub fn extend_ttl(&self, _threshold: u32, _extend_to: u32) {}
 
     pub fn remove<K>(&self, _key: &K)
     where
@@ -96,7 +96,7 @@ impl MockStoragePersistent {
     {
     }
 
-    pub fn bump<K>(&self, _key: &K, _low_expiration_watermark: u32, _high_expiration_watermark: u32)
+    pub fn extend_ttl<K>(&self, _key: &K, _threshold: u32, _extend_to: u32)
     where
         K: IntoVal<Env, Val>,
     {
@@ -138,7 +138,7 @@ impl MockStorageTemporary {
     {
     }
 
-    pub fn bump<K>(&self, _key: &K, _low_expiration_watermark: u32, _high_expiration_watermark: u32)
+    pub fn extend_ttl<K>(&self, _key: &K, _threshold: u32, _extend_to: u32)
     where
         K: IntoVal<Env, Val>,
     {

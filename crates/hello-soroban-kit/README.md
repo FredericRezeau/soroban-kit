@@ -34,7 +34,7 @@ This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-ki
    ```sh
    output > ["Hello","TESTER"]
    ```
-5. Check out [test.rs](src/test.rs) for more detailed integration examples.
+5. Check out [lib.rs](src/lib.rs) and [test.rs](src/test.rs) for detailed integration examples.
    
 
 ## Contributing

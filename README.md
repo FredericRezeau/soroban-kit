@@ -40,6 +40,23 @@ Leveraging Rust advanced type system, soroban-kit `state-machine` can handle com
 
 #### Documentation
 
+`#[state-machine]` named arguments:
+- `state`: StatePath := EnumName ":" VariantName [":" TupleValue]
+- `region`: RegionPath := EnumName ":" VariantName [":" TupleValue]
+- `transition`: true | false
+- `storage`: instance | persistent | temporary
+
+```rust
+    // Example.
+    #[state_machine(
+        state = "State:Registered:user",
+        region = "Role:Admin:user",
+        transition = true,
+        storage = "instance",
+    )]
+    fn function(user: User, ...)
+```
+
 Make sure you check out the [Gaming Lobby](/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](/crates/hello-soroban-kit/src/test.rs) state machines examples. Complete documentation can be found in the `soroban-macros` [README](crates/soroban-macros/README.md).
 
 ### Storage Macros
@@ -59,32 +76,32 @@ The `storage` macros streamline this process by automatically generating the boi
 
 #### Documentation
 
-Documentation and usage examples can be found in the `soroban-macros` [README](crates/soroban-macros/README.md).
+Documentation and usage examples can be found in the `soroban-macros` [README](crates/soroban-macros).
 
 ## soroban-tools crate
 
 ### State Machine Module
 
-The `fsm` (finite state machine) module exports the `impl_state_machine!` macro which is essentially the declarative version of the procedural macro exported from the `soroban-macros` crate.
+The `fsm` (finite state machine) module exports the `impl_state_machine!` macro which is the declarative version of the procedural macro exported from the `soroban-macros` crate.
 
 #### Documentation
 
-Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools/README.md).
+Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools).
 
 ### Storage Module
 
-The `storage` module exports the `impl_storage!` and `impl_key_constraint!` macros which are essentially the declarative versions of the procedural macros exported from the `soroban-macros` crate.
+The `storage` module exports the `impl_storage!` and `impl_key_constraint!` macros which are the declarative versions of the procedural macros exported from the `soroban-macros` crate.
 
 #### Documentation
 
-Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools/README.md).
+Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools).
 
 
 ## hello-soroban-kit contract
 
 A simple Soroban smart contract example showcasing the use of `soroban-tools` and `soroban-macros`.
 
-Read [hello-soroban-kit documentation](crates/hello-soroban-kit/).
+Read [hello-soroban-kit documentation](crates/hello-soroban-kit).
 
 ## Contributing
 

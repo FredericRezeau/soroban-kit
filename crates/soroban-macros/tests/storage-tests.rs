@@ -58,8 +58,8 @@ mod tests {
         // Verify that the storage now has the data.
         assert_eq!(storage::has::<K, D>(&env, &key), true);
 
-        // Bump the data.
-        storage::bump::<K, D>(&env, &key, 1, 1);
+        // Extend data TTL.
+        storage::extend_ttl::<K, D>(&env, &key, 1, 1);
 
         // Get the data (unwrap).
         assert_eq!(storage::get::<K, D>(&env, &key).unwrap(), data);
@@ -123,7 +123,7 @@ mod tests {
                 &env,
                 &AdminKey::Admin,
                 AdminData {
-                    address: Address::random(&env),
+                    address: Address::generate(&env),
                 },
             );
         }
@@ -132,9 +132,9 @@ mod tests {
             // Run generics tests.
             run_storage_tests(
                 &env,
-                &UserKey::User(Address::random(&env)),
+                &UserKey::User(Address::generate(&env)),
                 UserData {
-                    address: Address::random(&env),
+                    address: Address::generate(&env),
                 },
             );
         }
@@ -233,8 +233,8 @@ mod tests {
         // Verify that the storage now has the data.
         assert_eq!(storage::has::<TestKey, TestData>(&env, &key), true);
 
-        // Bump the data.
-        storage::bump::<TestKey, TestData>(&env, &key, 1, 1);
+        // Extend data TTL.
+        storage::extend_ttl::<TestKey, TestData>(&env, &key, 1, 1);
 
         // Remove the data.
         storage::remove::<TestKey, TestData>(&env, &key);

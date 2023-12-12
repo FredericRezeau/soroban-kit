@@ -45,7 +45,7 @@ Leveraging Rust advanced type system, soroban-kit `state-machine` can handle com
         transition = true,
         storage = "instance",
     )]
-    fn function(...)
+    fn function(user: User, ...)
 ```
 
 Check out the integration tests [Gaming Lobby](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit/src/test.rs) state machine examples for detailed usage.
@@ -53,7 +53,7 @@ Check out the integration tests [Gaming Lobby](https://github.com/FredericRezeau
 Cargo.toml:
 ```toml
 [dependencies]
-soroban-macros = { version = "0.1.2", features = ["state-machine"] }
+soroban-macros = { version = "0.1.3", features = ["state-machine"] }
 ```
 ## Storage Macros
 
@@ -100,7 +100,7 @@ Check out the [Storage](https://github.com/FredericRezeau/soroban-kit/blob/maste
 Cargo.toml:
 ```toml
 [dependencies]
-soroban-macros = { version = "0.1.2", features = ["storage"] }
+soroban-macros = { version = "0.1.3", features = ["storage"] }
 ```
 
 ## Contributing

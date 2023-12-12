@@ -148,8 +148,8 @@ mod tests {
             // soroban-kit FSM allows modeling complex concurrency behaviors
             // with regions and extended state variables.
 
-            let player1 = Address::random(&env);
-            let player2 = Address::random(&env);
+            let player1 = Address::generate(&env);
+            let player2 = Address::generate(&env);
             let gaming_lobby = GamingLobby;
 
             // Set the initial state to Opened.
