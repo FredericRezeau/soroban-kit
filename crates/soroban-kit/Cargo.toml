@@ -1,0 +1,22 @@
+[package]
+name = "soroban-kit"
+version = "0.1.3"
+edition = "2021"
+authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
+description = "Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development."
+repository = "https://github.com/fredericrezeau/soroban-kit"
+keywords = ["soroban", "stellar", "blockchain", "smart-contract"]
+license-file = "LICENSE"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies.soroban-macros]
+path = "../soroban-macros"
+version = "0.1.3"
+default-features = false
+features = ["storage", "state-machine"]
+
+[dependencies.soroban-tools]
+path = "../soroban-tools"
+version = "0.1.3"
