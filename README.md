@@ -30,7 +30,7 @@ A collection of procedural macros designed to streamline development for Soroban
 
 ### State Machine Macro
 
-The `state-machine` attribute macro can be used to implement versatile state machines in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
+The `state-machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
 
 #### Background
 
@@ -44,7 +44,7 @@ Make sure you check out the [Gaming Lobby](/crates/soroban-macros/tests/state-ma
 
 ### Storage Macros
 
-`storage` and `key_constraint` generate a minimal wrapper for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
+`storage` and `key_constraint` generate a minimal wrapper (see [storage/impl.rs](crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
 
 #### Background
 

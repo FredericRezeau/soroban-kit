@@ -21,7 +21,7 @@ This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-ki
 
 ## State Machine Macro
 
-The `state-machine` attribute macro can be used to implement versatile state machines in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
+The `state-machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
 
 ### Background
 
@@ -48,7 +48,7 @@ Leveraging Rust advanced type system, soroban-kit `state-machine` can handle com
     fn function(...)
 ```
 
-Check out the integration tests [Gaming Lobby](/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](/crates/hello-soroban-kit/src/test.rs) state machine examples for detailed usage.
+Check out the integration tests [Gaming Lobby](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit/src/test.rs) state machine examples for detailed usage.
 
 Cargo.toml:
 ```toml
@@ -57,7 +57,7 @@ soroban-macros = { version = "0.1.2", features = ["state-machine"] }
 ```
 ## Storage Macros
 
-`storage` and `key_constraint` generate a minimal wrapper for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
+`storage` and `key_constraint` generate a minimal wrapper (see [storage/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
 
 ### Background
 
@@ -95,7 +95,7 @@ The `storage` macros streamline this process by automatically generating the boi
     }
 ```
 
-Check out the [Storage](/crates/soroban-macros/tests/state-machine-tests.rs) integration tests and [Hello](/crates/hello-soroban-kit/src/test.rs) smart contract examples for detailed usage.
+Check out the [Storage](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/storage-tests.rs) integration tests and [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit/src/test.rs) tests for detailed usage.
 
 Cargo.toml:
 ```toml
