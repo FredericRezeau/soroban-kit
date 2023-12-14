@@ -7,122 +7,33 @@
 */
 
 #![no_std]
-use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, vec, Address, Env, IntoVal, Symbol,
-    TryFromVal, Val, Vec,
-};
 
-use soroban_kit::{
-    fsm::{StateMachine, TransitionHandler},
-    key_constraint, soroban_tools, state_machine, storage,
-};
+mod examples; // Examples module.
+mod types; // Contract types.
 
-// Optional but recommended.
-// Use `key_constraint` to apply a constraint to the Key
-// that will be used to operate the storage.
-#[contracttype]
-#[key_constraint(DataKeyConstraint)]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum DataKey {
-    Newcomer,
-}
+use soroban_sdk::{contract, contractimpl, Env, Symbol, Vec};
 
-// Use `storage` to implement the desired storage for your
-// custom contract type. We also apply the DataKeyConstraint.
-#[contracttype]
-#[storage(Instance, DataKeyConstraint)]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Data {
-    pub newcomer: Symbol,
+use examples::{example_rock_paper_scissors, example_storage};
+
+pub trait HelloContractTrait {
+    fn rock_paper_scissors(env: Env);
+    fn hello(env: Env, newcomer: Symbol) -> Vec<Symbol>;    
 }
 
 #[contract]
-pub struct Contract;
+pub struct HelloContract;
 
 #[contractimpl]
-impl Contract {
-    pub fn hello(env: Env, newcomer: Symbol) -> Vec<Symbol> {
-        let key = DataKey::Newcomer;
-        let data = Data { newcomer };
-
-        // Let's set newcomer to instance storage.
-        storage::set(&env, &key, &data);
-
-        // Greetings from storage!
-
-        // Unlike calling env.storage().instance().get(&key) the compiler can
-        // now infer your Option<Data> type as soroban_kit::storage provides
-        // a concrete implementation over the Data type.
-
-        // To make sure the Rust type inference engine can always infer
-        // types when you use several storage data, you can use key constraints.
-
-        let stored_newcomer = storage::get(&env, &key).unwrap().newcomer;
-
-        vec![&env, symbol_short!("Hello"), stored_newcomer]
+impl HelloContractTrait for HelloContract {
+    // Example implementing "rock paper scissors" with
+    // soroban-kit `state-machine, `commit` and `reveal`.
+    fn rock_paper_scissors(env: Env) {
+        example_rock_paper_scissors::hello(env);
     }
 
-    pub fn run_state_machine(env: Env, user: Address) {
-        // For more complete state-machine examples check:
-        // - Gaming lobby example: `crates/soroban-macros/tests/state-machine-tests.rs` in soroban-macros integration tests.
-        // - Coffee machine example: `crates/hello-soroban-kit/src/test.rs`
-
-        // Declare the state machine.
-        struct MyStateMachine;
-
-        // Declare the states
-        #[contracttype]
-        #[derive(Clone, Debug, Eq, PartialEq)]
-        pub enum State {
-            Opened,
-            Running(Address),
-            Closed,
-        }
-
-        // Declare the regions.
-        #[contracttype]
-        #[derive(Clone, Debug, Eq, PartialEq)]
-        pub enum Region {
-            Global,
-            Specific(Address),
-        }
-
-        // Implement the TransitionHandler trait for MyStateMachine.
-        impl<K, V> TransitionHandler<K, V> for MyStateMachine
-        where
-            K: IntoVal<Env, Val> + TryFromVal<Env, Val>,
-            V: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val> + Into<State>,
-        {
-            fn on_guard(&self, _env: &Env, _state_machine: &soroban_kit::fsm::StateMachine<K, V>) {}
-            fn on_effect(&self, _env: &Env, _state_machine: &soroban_kit::fsm::StateMachine<K, V>) {
-            }
-        }
-
-        // Implement MyStateMachine, use the #[state_machine] attribute to
-        // declare your state machine functions.
-        impl MyStateMachine {
-            #[state_machine(
-                state = "State:Running:user",
-                region = "Region:Specific:user",
-                transition = true,
-                storage = "temporary"
-            )]
-            fn run(&self, env: &Env, user: &Address) {}
-
-            fn init(&self, env: &Env, user: &Address) {
-                let region = Region::Specific(user.clone());
-                let state_machine = StateMachine::<Region, State>::new(
-                    &region,
-                    soroban_kit::fsm::StorageType::Temporary,
-                );
-                state_machine.set_state(&env, State::Running(user.clone()));
-            }
-        }
-
-        // Run it.
-        let state_machine = MyStateMachine;
-        state_machine.init(&env, &user);
-        state_machine.run(&env, &user);
+    // Example saying hello with soroban-kit type safe `storage`.
+    fn hello(env: Env, newcomer: Symbol) -> Vec<Symbol> {
+        example_storage::hello(env, newcomer)
     }
 }
 
