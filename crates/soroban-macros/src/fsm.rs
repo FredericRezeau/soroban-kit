@@ -20,21 +20,12 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut state_path = [None, None, None];
     let mut region_path = [None, None, None];
     let mut storage_type = None;
-    let mut is_transition_handler = false;
 
-    // Parse macro attributes:
-    // state: StatePath := EnumName ":" VariantName [":" TupleValue]
-    // region: RegionPath := EnumName ":" VariantName [":" TupleValue]
-    // transition: true | false
-    // storage: instance | persistent | temporary
     for arg in args {
         match arg {
             NestedMeta::Meta(Meta::NameValue(nv)) => match nv.path.get_ident() {
                 Some(ident) if ident == "state" => state_path = parse_path(&nv.lit),
                 Some(ident) if ident == "region" => region_path = parse_path(&nv.lit),
-                Some(ident) if ident == "handler" => {
-                    is_transition_handler = matches!(nv.lit, Lit::Bool(b) if b.value)
-                }
                 Some(ident) if ident == "storage" => {
                     if let Lit::Str(lit_str) = &nv.lit {
                         storage_type = Some(lit_str.value());
@@ -83,7 +74,6 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
                             self,
                             env,
                             soroban_tools::fsm::StorageType::#storage_type_ident,
-                            #is_transition_handler,
                             #state_enum, #state_variant, (),
                             #region_enum, #region_variant, ()
                         );
@@ -95,7 +85,6 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
                             self,
                             env,
                             soroban_tools::fsm::StorageType::#storage_type_ident,
-                            #is_transition_handler,
                             #state_enum, #state_variant
                         );
                     }
@@ -107,7 +96,6 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
                         self,
                         env,
                         soroban_tools::fsm::StorageType::#storage_type_ident,
-                        #is_transition_handler,
                         #state_enum, #state_variant, (),
                         #region_enum, #region_variant, ( #region_tuple_value_expr.clone() )
                     );
@@ -120,7 +108,6 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
                             self,
                             env,
                             soroban_tools::fsm::StorageType::#storage_type_ident,
-                            #is_transition_handler,
                             #state_enum, #state_variant, ( #state_tuple_value_expr.clone() ),
                             #region_enum, #region_variant, ()
                         );
@@ -132,7 +119,6 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
                             self,
                             env,
                             soroban_tools::fsm::StorageType::#storage_type_ident,
-                            #is_transition_handler,
                             #state_enum, #state_variant, ( #state_tuple_value_expr.clone() )
                         );
                     }
@@ -144,7 +130,6 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
                         self,
                         env,
                         soroban_tools::fsm::StorageType::#storage_type_ident,
-                        #is_transition_handler,
                         #state_enum, #state_variant, ( #state_tuple_value_expr.clone() ),
                         #region_enum, #region_variant, ( #region_tuple_value_expr.clone() )
                     );

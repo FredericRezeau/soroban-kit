@@ -4,9 +4,9 @@
 # hello-soroban-kit
 [![Build Status](https://app.travis-ci.com/FredericRezeau/soroban-kit.svg?branch=main)](https://app.travis-ci.com/FredericRezeau/soroban-kit)
 
-This crate is part of [soroban-kit](https://github.com/FredericRezeau/soroban-kit) which provides fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development.
+This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/soroban-kit) | [crates.io](https://crates.io/crates/soroban-kit).
 
-`hello-soroban-kit` is a simple Soroban smart contract example showcasing the use of `soroban-tools` and `soroban-macros`.
+`hello-soroban-kit` is a Soroban smart contract demo showcasing the use of all features in `soroban-kit`.
 
 ## Commands
 

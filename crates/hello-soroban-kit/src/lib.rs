@@ -12,10 +12,9 @@ use soroban_sdk::{
     TryFromVal, Val, Vec,
 };
 
-use soroban_macros::{key_constraint, state_machine, storage};
-use soroban_tools::{
+use soroban_kit::{
     fsm::{StateMachine, TransitionHandler},
-    storage,
+    key_constraint, soroban_tools, state_machine, storage,
 };
 
 // Optional but recommended.
@@ -52,7 +51,7 @@ impl Contract {
         // Greetings from storage!
 
         // Unlike calling env.storage().instance().get(&key) the compiler can
-        // now infer your Option<Data> type as soroban_tools::storage provides
+        // now infer your Option<Data> type as soroban_kit::storage provides
         // a concrete implementation over the Data type.
 
         // To make sure the Rust type inference engine can always infer
@@ -64,9 +63,6 @@ impl Contract {
     }
 
     pub fn run_state_machine(env: Env, user: Address) {
-
-        // This is just a quick state-machine setup demo
-
         // For more complete state-machine examples check:
         // - Gaming lobby example: `crates/soroban-macros/tests/state-machine-tests.rs` in soroban-macros integration tests.
         // - Coffee machine example: `crates/hello-soroban-kit/src/test.rs`
@@ -97,8 +93,9 @@ impl Contract {
             K: IntoVal<Env, Val> + TryFromVal<Env, Val>,
             V: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val> + Into<State>,
         {
-            fn on_guard(&self, _env: &Env, _state_machine: &soroban_tools::fsm::StateMachine<K, V>) {}
-            fn on_effect(&self, _env: &Env, _state_machine: &soroban_tools::fsm::StateMachine<K, V>) {}
+            fn on_guard(&self, _env: &Env, _state_machine: &soroban_kit::fsm::StateMachine<K, V>) {}
+            fn on_effect(&self, _env: &Env, _state_machine: &soroban_kit::fsm::StateMachine<K, V>) {
+            }
         }
 
         // Implement MyStateMachine, use the #[state_machine] attribute to
@@ -110,13 +107,14 @@ impl Contract {
                 transition = true,
                 storage = "temporary"
             )]
-            fn run(&self, env: &Env, user: &Address) {
-            }
+            fn run(&self, env: &Env, user: &Address) {}
 
             fn init(&self, env: &Env, user: &Address) {
                 let region = Region::Specific(user.clone());
-                let state_machine =
-                    StateMachine::<Region, State>::new(&region, soroban_tools::fsm::StorageType::Temporary);
+                let state_machine = StateMachine::<Region, State>::new(
+                    &region,
+                    soroban_kit::fsm::StorageType::Temporary,
+                );
                 state_machine.set_state(&env, State::Running(user.clone()));
             }
         }

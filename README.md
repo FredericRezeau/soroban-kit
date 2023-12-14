@@ -3,34 +3,40 @@
 
 # soroban-kit
 [![Build Status](https://app.travis-ci.com/FredericRezeau/soroban-kit.svg?branch=main)](https://app.travis-ci.com/FredericRezeau/soroban-kit)
+[![Current Crates.io Version](https://img.shields.io/crates/v/soroban-kit.svg)](https://crates.io/crates/soroban-kit)
 
-Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development. All modules in Rust crates are [feature flagged](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section), compile just what you need and nothing more!
+Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development. All modules are [feature flagged](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section), compile just what you need and nothing more!
 
 - [soroban-kit](#soroban-kit)
-  - [soroban-macros crate](#soroban-macros-crate)
-    - [State Machine Macro](#state-machine-macro)
+  - [Features](#features)
+    - [Extended State Machine](#extended-state-machine)
       - [Background](#background)
       - [Documentation](#documentation)
-    - [Storage Macros](#storage-macros)
+      - [Examples](#examples)
+    - [Commitment scheme](#commitment-scheme)
       - [Background](#background-1)
       - [Documentation](#documentation-1)
-  - [soroban-tools crate](#soroban-tools-crate)
-    - [State Machine Module](#state-machine-module)
+      - [Examples](#examples-1)
+    - [Type Safe Storage](#type-safe-storage)
+      - [Background](#background-2)
       - [Documentation](#documentation-2)
-    - [Storage Module](#storage-module)
-      - [Documentation](#documentation-3)
-  - [hello-soroban-kit contract](#hello-soroban-kit-contract)
+      - [Examples](#examples-2)
+  - [Smart Contract Demo](#smart-contract-demo)
   - [Contributing](#contributing)
   - [License](#license)
   - [Contact](#contact)
 
-## soroban-macros crate
 
-A collection of procedural macros designed to streamline development for Soroban smart contracts. Read the [documentation](crates/soroban-macros/).
+## Features
 
-### State Machine Macro
+### Extended State Machine
 
-The `state-machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions, runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
+```toml
+[dependencies]
+soroban-kit = { version = "0.1.4", default-features = false, features = ["state-machine"] }
+```
+
+The `state-machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions (composite states), runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
 
 #### Background
 
@@ -40,68 +46,128 @@ Leveraging Rust advanced type system, soroban-kit `state-machine` can handle com
 
 #### Documentation
 
-`#[state-machine]` named arguments:
-- `state`: StatePath := EnumName ":" VariantName [":" TupleValue]
-- `region`: RegionPath := EnumName ":" VariantName [":" TupleValue]
-- `transition`: true | false
-- `storage`: instance | persistent | temporary
-
+`#[state-machine]` options:
+- `state`: StatePath := EnumName ":" VariantName [":" TupleVariableName]
+- `region`: RegionPath := EnumName ":" VariantName [":" TupleVariableName]
+- `storage`: "instance" (default) | "persistent" | "temporary"
 ```rust
-    // Example.
+    // Example
     #[state_machine(
-        state = "State:Registered:user",
-        region = "Role:Admin:user",
-        transition = true,
-        storage = "instance",
-    )]
-    fn function(user: User, ...)
+      state = "Phase:Committing:voter",
+      region = "Domain:Booth:voter")]
+    fn my_state_machine_function(&self, env: &Env, voter: &Voter) {
+    }
 ```
 
-Make sure you check out the [Gaming Lobby](/crates/soroban-macros/tests/state-machine-tests.rs) and [Coffee Machine](/crates/hello-soroban-kit/src/test.rs) state machines examples. Complete documentation can be found in the `soroban-macros` [README](crates/soroban-macros/README.md).
+#### Examples
 
-### Storage Macros
+- [Polling Station Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs)
+- [Game Lobby Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/state-machine-tests.rs)
+- [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
 
-`storage` and `key_constraint` generate a minimal wrapper (see [storage/impl.rs](crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
+### Commitment scheme
+
+```toml
+[dependencies]
+soroban-kit = { version = "0.1.4", default-features = false, features = ["commitment-scheme"] }
+```
+The `commit` and `reveal` attribute macros are designed to easily implement the commitment scheme in your Soroban smart contract. They use the soroban-sdk _sha256_ or _keccak256_ hash functions and storage with automatic hash removal.
+
+These attributes can also be paired with the `state-machine` attribute to manage the commitment and reveal phases for multiple parties. For a comprehensive demo of such pairing, refer to the [Polling Station](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs) example.
+
+```rust
+        #[commit]
+        #[state_machine(state = "Phase:Committing")]
+        fn vote(&self, env: &Env, hash: &BytesN<32>) {
+        }
+
+        #[reveal]
+        #[state_machine(state = "Phase:Revealing")]
+        fn reveal(&self, env: &Env, data: &Bytes) {
+        }
+```
+
+#### Background
+
+Commitment schemes allow parties to commit to a value, keeping it hidden until a later time. This technique can be applied in use cases such as voting systems, zero-knowledge proofs (ZKPs), pseudo-random number generation (PRNG) seeding and more.
+
+The `commit` and `reveal` macros in `soroban-kit` allow a boilerplate-free implementation of the commitment scheme using rust attributes.
+
+#### Documentation
+
+`#[commit]` options:
+- `hash`: VariableName (default = "hash")
+- `storage`: "instance" (default) | "persistent" | "temporary"
+```rust
+    // Example
+    #[commit(hash = "commit_hash")]
+    fn my_commit_function(env: &Env, commit_hash: &BytesN<32>) {
+    }
+```
+
+`#[reveal]` options:
+- `data`: VariableName (default = "data")
+- `hash_func`: "sha256" (default) | "keccak256"
+- `clear_commit`: true (default) | false
+- `storage`: "instance" (default) | "persistent" | "temporary"
+```rust
+    // Example
+    #[reveal(data = "reveal_data")]
+    fn my_reveal_function(env: &Env, reveal_data: &Bytes) {
+    }
+```
+
+#### Examples
+
+- [Polling Station Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs)
+- [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
+
+### Type Safe Storage
+
+```toml
+[dependencies]
+soroban-kit = { version = "0.1.4", default-features = false, features = ["storage"] }
+```
+
+The `storage` and `key_constraint` macros generate a minimal wrapper (see [storage/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
 
 #### Background
 
 When dealing with the Soroban storage, repetitive boilerplate code is typically required for encapsulation and type safety over generic storage functions.
 
-```rust
-    // For all storage functions... copy-pasted for all custom data types...
-    fn set_user_data(key: &userKey, data: &UserData)    
-```
-
 The `storage` macros streamline this process by automatically generating the boilerplate code, enforcing type rules at compile time, binding the storage with custom data types and optionally, applying Trait constraints to storage keys.
 
 #### Documentation
 
-Documentation and usage examples can be found in the `soroban-macros` [README](crates/soroban-macros).
+`#[storage]` options (positional arguments):
+- `Storage`: Instance (default) | Persistent | Temporary
+- `Key`: Trait
+```rust
+    // Example
+    #[storage(Instance, AdminKeyConstraint)]
+    pub struct AdminData {
+        pub address: Address,
+    }
+```
 
-## soroban-tools crate
+`#[key-constraint]` options (positional arguments):
+- `Key`: Trait
+```rust
+    // Example
+    #[key_constraint(AdminKeyConstraint)]
+    pub enum Key {
+        Admin,
+    }
+```
 
-### State Machine Module
+#### Examples
 
-The `fsm` (finite state machine) module exports the `impl_state_machine!` macro which is the declarative version of the procedural macro exported from the `soroban-macros` crate.
+- [Integration Tests](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/storage-tests.rs)
+- [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
 
-#### Documentation
+## Smart Contract Demo
 
-Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools).
-
-### Storage Module
-
-The `storage` module exports the `impl_storage!` and `impl_key_constraint!` macros which are the declarative versions of the procedural macros exported from the `soroban-macros` crate.
-
-#### Documentation
-
-Documentation and usage examples can be found in the `soroban-tools` [README](crates/soroban-tools).
-
-
-## hello-soroban-kit contract
-
-A simple Soroban smart contract example showcasing the use of `soroban-tools` and `soroban-macros`.
-
-Read [hello-soroban-kit documentation](crates/hello-soroban-kit).
+`hello-soroban-kit` is a simple Soroban smart contract demo showcasing the use of all `soroban-kit` features. Read [hello-soroban-kit documentation](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit).
 
 ## Contributing
 

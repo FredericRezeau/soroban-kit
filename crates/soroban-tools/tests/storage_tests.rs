@@ -221,9 +221,9 @@ mod tests {
         impl_storage!(Instance, TestData, TestKeyConstraint);
 
         let env = Env::default();
-        let key = &TestKey::Session(Address::random(&env));
+        let key = &TestKey::Session(Address::generate(&env));
         let data = TestData {
-            address: Address::random(&env),
+            address: Address::generate(&env),
         };
 
         // Try to get the data, should panic.

@@ -107,46 +107,44 @@ pub enum StateMachineRegion {
 // See @internal arm for state validation logic.
 #[macro_export]
 macro_rules! impl_state_machine {
-    ($instance:expr, $env:expr, $storage_type:expr, $handler:expr, $state_enum:ident, $state_variant:ident) => {
+    ($instance:expr, $env:expr, $storage_type:expr, $state_enum:ident, $state_variant:ident) => {
         let state_key = $state_enum::$state_variant;
         let region_key = $crate::fsm::StateMachineRegion::Default;
-        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, $handler, state_key, region_key, $state_enum, $crate::fsm::StateMachineRegion);
+        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, state_key, region_key, $state_enum, $crate::fsm::StateMachineRegion);
     };
-    ($instance:expr, $env:expr, $storage_type:expr, $handler:expr, $state_enum:ident, $state_variant:ident, (),
+    ($instance:expr, $env:expr, $storage_type:expr, $state_enum:ident, $state_variant:ident, (),
         $region_enum:ident, $region_variant:ident, ()) => {
         let state_key = $state_enum::$state_variant;
         let region_key = $region_enum::$region_variant;
-        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, $handler, state_key, region_key, $state_enum, $region_enum);
+        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, state_key, region_key, $state_enum, $region_enum);
     };
-    ($instance:expr, $env:expr, $storage_type:expr, $handler:expr, $state_enum:ident, $state_variant:ident,
+    ($instance:expr, $env:expr, $storage_type:expr, $state_enum:ident, $state_variant:ident,
         (), $region_enum:ident, $region_variant:ident, ($($region_tuple_value:expr),+)) => {
         let state_key = $state_enum::$state_variant;
         let region_key = $region_enum::$region_variant($($region_tuple_value),*);
-        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, $handler, state_key, region_key, $state_enum, $region_enum);
+        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, state_key, region_key, $state_enum, $region_enum);
     };
-    ($instance:expr, $env:expr, $storage_type:expr, $handler:expr, $state_enum:ident, $state_variant:ident, ($($state_tuple_value:expr),+)) => {
+    ($instance:expr, $env:expr, $storage_type:expr, $state_enum:ident, $state_variant:ident, ($($state_tuple_value:expr),+)) => {
         let state_key = $state_enum::$state_variant($($state_tuple_value),*);
         let region_key = $crate::fsm::StateMachineRegion::Default;
-        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, $handler, state_key, region_key, $state_enum, $crate::fsm::StateMachineRegion);
+        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, state_key, region_key, $state_enum, $crate::fsm::StateMachineRegion);
     };
-    ($instance:expr, $env:expr, $storage_type:expr, $handler:expr, $state_enum:ident, $state_variant:ident, ($($state_tuple_value:expr),+),
+    ($instance:expr, $env:expr, $storage_type:expr, $state_enum:ident, $state_variant:ident, ($($state_tuple_value:expr),+),
         $region_enum:ident, $region_variant:ident, ()) => {
         let state_key = $state_enum::$state_variant($($state_tuple_value),*);
         let region_key = $region_enum::$region_variant;
-        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, $handler, state_key, region_key, $state_enum, $region_enum);
+        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, state_key, region_key, $state_enum, $region_enum);
     };
-    ($instance:expr, $env:expr, $storage_type:expr, $handler:expr, $state_enum:ident, $state_variant:ident,
+    ($instance:expr, $env:expr, $storage_type:expr, $state_enum:ident, $state_variant:ident,
         ($($state_tuple_value:expr),+),$region_enum:ident, $region_variant:ident, ($($region_tuple_value:expr),+)) => {
         let state_key = $state_enum::$state_variant($($state_tuple_value),*);
         let region_key = $region_enum::$region_variant($($region_tuple_value),*);
-        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, $handler, state_key, region_key, $state_enum, $region_enum);
+        $crate::impl_state_machine!(@internal $instance, $env, $storage_type, state_key, region_key, $state_enum, $region_enum);
     };
     // @internal
-    (@internal $instance:expr, $env:expr, $storage_type:expr, $handler:expr, $state_key:expr, $region_key:expr, $state_enum:ty, $region_enum:ty) => {
+    (@internal $instance:expr, $env:expr, $storage_type:expr, $state_key:expr, $region_key:expr, $state_enum:ty, $region_enum:ty) => {
         let sm = $crate::fsm::StateMachine::<$region_enum, $state_enum>::new(&$region_key, $storage_type);
-        if $handler {
-            $instance.on_guard($env, &sm);
-        }
+        $instance.on_guard($env, &sm);
         match sm.get_state(&$env) {
             Some(current_state) if current_state != $state_key =>
                 panic!("Expected state {:?} but got {:?}", current_state, $state_key),
@@ -154,8 +152,6 @@ macro_rules! impl_state_machine {
                 panic!("Expected state set in state-machine"),
             _ => {}
         }
-        if $handler {
-            $instance.on_effect($env, &sm);
-        }
+        $instance.on_effect($env, &sm);
     };
 }

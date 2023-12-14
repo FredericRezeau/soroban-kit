@@ -6,7 +6,7 @@
     MIT License
 */
 
-/// Integration tests for the soroban-macros state-machine module.
+/// Integration tests for the soroban-macros state-machine module (`fsm`).
 #[cfg(feature = "state-machine")]
 mod tests {
 
@@ -15,7 +15,7 @@ mod tests {
 
     use core::panic::AssertUnwindSafe;
     use soroban_sdk::{
-        contract, contractimpl, contracttype, testutils::Address as _, Address, Env
+        contract, contractimpl, contracttype, testutils::Address as _, Address, Env,
     };
 
     use soroban_macros::state_machine;
@@ -61,16 +61,13 @@ mod tests {
             match room {
                 Room::Public => {
                     assert_eq!(state, State::Opened);
-                },
-                _ => {
-                    match state {
-                        State::Ready 
-                        | State::Playing(Game::WorldOfWarcraft) 
-                        | State::Playing(Game::LeagueOfLegends) => {
-                        },
-                        _ => panic!("Invalid state."),
-                    }
                 }
+                _ => match state {
+                    State::Ready
+                    | State::Playing(Game::WorldOfWarcraft)
+                    | State::Playing(Game::LeagueOfLegends) => {}
+                    _ => panic!("Invalid state."),
+                },
             }
         }
 
@@ -81,37 +78,26 @@ mod tests {
     }
 
     impl GamingLobby {
-        // This function panics when gaming lobby
-        // state is not State:Opened
-        #[state_machine(
-            state = "State:Opened",
-            region = "Room:Public",
-            transition = true,
-            storage = "instance"
-        )]
+        // This function panics when gaming lobby state is not State:Opened.
+        #[state_machine(state = "State:Opened", region = "Room:Public")]
         fn login(&self, env: &Env, account: &Address) {
             self.set_state(&env, State::Ready, &account);
         }
-    
-        // This function panics when gaming lobby
-        // state is not State:Ready.
+
+        // This function panics when gaming lobby state is not State:Ready.
         #[state_machine(
             state = "State:Ready",
-            region = "Room:Private:account",
-            transition = true,
-            storage = "instance"
+            region = "Room:Private:account"
         )]
         fn play(&self, env: &Env, account: &Address, item: &Game) {
             self.set_state(&env, State::Playing(item.clone()), &account);
         }
-    
+
         // This function panics when gaming lobby
         // state is not State:Playing(Game), the tuple runtime value must match.
         #[state_machine(
             state = "State:Playing:item",
-            region = "Room:Private:account",
-            transition = true,
-            storage = "instance"
+            region = "Room:Private:account"
         )]
         fn rage_quit(&self, env: &Env, account: &Address, item: &Game) {}
 
@@ -119,18 +105,17 @@ mod tests {
         // state is not State:Playing(Game), the tuple runtime value must match.
         #[state_machine(
             state = "State:Playing:item",
-            region = "Room:Private:account",
-            transition = true,
-            storage = "instance"
+            region = "Room:Private:account"
         )]
         fn quit(&self, env: &Env, account: &Address, item: &Game) {}
-    
+
         fn set_state(&self, env: &Env, state: State, account: &Address) {
             let region = Room::Private(account.clone());
-            let state_machine = StateMachine::<Room, State>::new(&region, fsm::StorageType::Instance);
+            let state_machine =
+                StateMachine::<Room, State>::new(&region, fsm::StorageType::Instance);
             state_machine.set_state(&env, state);
         }
-    
+
         fn open(&self, env: &Env) {
             let state_machine =
                 StateMachine::<Room, State>::new(&Room::Public, fsm::StorageType::Instance);
@@ -141,7 +126,6 @@ mod tests {
     #[contract]
     pub struct TestContract;
 
-    // Using TestContract instance to run tests.
     #[contractimpl]
     impl TestContract {
         pub fn test_state_machine(env: Env) {
@@ -168,7 +152,10 @@ mod tests {
             let result = catch_unwind(AssertUnwindSafe(|| {
                 gaming_lobby.rage_quit(&env, &player1, &Game::LeagueOfLegends);
             }));
-            assert!(result.is_err(), "The operation should panic. Player1 is playing WorldOfWarcraft");
+            assert!(
+                result.is_err(),
+                "The operation should panic. Player1 is playing WorldOfWarcraft"
+            );
 
             gaming_lobby.quit(&env, &player1, &Game::WorldOfWarcraft);
             gaming_lobby.quit(&env, &player2, &Game::LeagueOfLegends);
