@@ -17,9 +17,8 @@ use soroban_sdk::{
 };
 
 use soroban_kit::{
-    commit, fsm,
-    fsm::{StateMachine, TransitionHandler},
-    key_constraint, reveal, soroban_tools, state_machine, storage,
+    commit, fsm, fsm::StateMachine, key_constraint, reveal, soroban_tools, state_machine, storage,
+    TransitionHandler,
 };
 
 #[contract]
@@ -64,9 +63,10 @@ pub enum Region {
     Buyer(Address),
 }
 
+#[derive(TransitionHandler)]
 pub struct CoffeeMachine;
 
-impl TransitionHandler<Region, State> for CoffeeMachine {
+impl CoffeeMachine {
     // Called immediately before state validation.
     // Used to implement guard conditions for the transition.
     fn on_guard(&self, env: &Env, state_machine: &StateMachine<Region, State>) {
@@ -82,11 +82,12 @@ impl TransitionHandler<Region, State> for CoffeeMachine {
 
     // Called immediately after state validation iff validation succeeded.
     // Used to implement the effect (immediate action) from transitioning.
-    // This code block has precedence over the attributed function body.
-    fn on_effect(&self, _env: &Env, _state_machine: &StateMachine<Region, State>) {}
-}
 
-impl CoffeeMachine {
+    // fn on_effect(&self, _env: &Env, _state_machine: &StateMachine<Region, State>) {
+    //     // This code block has precedence over the `state_machine`
+    //     // attributed function body.
+    // }
+
     // This function panics when vending machine
     // state is not State:Refilled
     #[state_machine(
@@ -159,30 +160,10 @@ pub enum Domain {
     Game,
 }
 
+#[derive(TransitionHandler)]
 pub struct RockPaperScissors;
 
 impl RockPaperScissors {
-    #[commit]
-    #[state_machine(state = "Phase:Committing:player", region = "Domain:Players:player")]
-    fn play(&self, env: &Env, player: &Player, hash: &BytesN<32>) {}
-
-    #[reveal]
-    #[state_machine(state = "Phase:Revealing:player", region = "Domain:Players:player")]
-    fn reveal(&self, env: &Env, player: &Player, data: &Bytes) {}
-
-    #[state_machine(state = "Phase:End", region = "Domain:Game")]
-    fn solve(&self, env: &Env) {}
-
-    fn reset_player(&self, env: &Env, player: Player) {
-        let domain = Domain::Players(player.clone());
-        let phase = Phase::Committing(player.clone());
-        let state_machine = StateMachine::<Domain, Phase>::new(&domain, fsm::StorageType::Instance);
-        state_machine.set_state(&env, phase);
-    }
-}
-
-// Handle the game phase transitions.
-impl TransitionHandler<Domain, Phase> for RockPaperScissors {
     fn on_effect(&self, env: &Env, state_machine: &StateMachine<Domain, Phase>) {
         let domain = state_machine.get_region();
         let phase = state_machine.get_state(&env).unwrap();
@@ -235,6 +216,24 @@ impl TransitionHandler<Domain, Phase> for RockPaperScissors {
     fn on_guard(&self, _env: &Env, _state_machine: &StateMachine<Domain, Phase>) {
         // Here you could implement a time-based guard to restrict the amount of time
         // allowed for players and so on...
+    }
+
+    #[commit]
+    #[state_machine(state = "Phase:Committing:player", region = "Domain:Players:player")]
+    fn play(&self, env: &Env, player: &Player, hash: &BytesN<32>) {}
+
+    #[reveal]
+    #[state_machine(state = "Phase:Revealing:player", region = "Domain:Players:player")]
+    fn reveal(&self, env: &Env, player: &Player, data: &Bytes) {}
+
+    #[state_machine(state = "Phase:End", region = "Domain:Game")]
+    fn solve(&self, env: &Env) {}
+
+    fn reset_player(&self, env: &Env, player: Player) {
+        let domain = Domain::Players(player.clone());
+        let phase = Phase::Committing(player.clone());
+        let state_machine = StateMachine::<Domain, Phase>::new(&domain, fsm::StorageType::Instance);
+        state_machine.set_state(&env, phase);
     }
 }
 

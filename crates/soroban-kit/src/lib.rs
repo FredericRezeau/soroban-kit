@@ -15,3 +15,8 @@ pub use soroban_macros::*;
 
 pub use soroban_tools;
 pub use soroban_tools::*;
+
+// Explicit since fsm::TransitionHandler trait is feature gated.
+#[cfg(feature = "state-machine")]
+// Bring this trait in scope for #[derive(TransitionHandler)]
+pub use soroban_tools::fsm::TransitionHandler;

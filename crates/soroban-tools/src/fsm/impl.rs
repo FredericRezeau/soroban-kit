@@ -10,20 +10,18 @@ use core::marker::PhantomData;
 use soroban_sdk::{contracttype, Env, IntoVal, TryFromVal, Val};
 
 // Control the state transition process flow.
-pub trait TransitionHandler<K, V> {
+pub trait TransitionHandler<K, V>
+where
+    K: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val>,
+    V: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val>,
+{
     // Called immediately before state validation.
     // Used to implement guard conditions for the transition (e.g., ledger sequence or time-based guards).
-    fn on_guard(&self, env: &Env, state_machine: &StateMachine<K, V>)
-    where
-        K: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val>,
-        V: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val>;
+    fn on_guard(&self, env: &Env, state_machine: &StateMachine<K, V>);
 
     // Called immediately after state validation iff validation succeeded.
     // Used to implement the effect from transitioning.
-    fn on_effect(&self, env: &Env, state_machine: &StateMachine<K, V>)
-    where
-        K: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val>,
-        V: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val>;
+    fn on_effect(&self, env: &Env, state_machine: &StateMachine<K, V>);
 }
 
 // Generic finite state machine using Soroban storage for state serialization.

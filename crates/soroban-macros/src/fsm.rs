@@ -9,10 +9,33 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, AttributeArgs, Ident, ItemFn, Lit, Meta, NestedMeta};
+use syn::{parse_macro_input, AttributeArgs, DeriveInput, Ident, ItemFn, Lit, Meta, NestedMeta};
 
 #[allow(unused_imports)]
 use soroban_tools::fsm::StorageType;
+
+pub fn transition_handler_derive(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    let ty = input.ident;
+    let expanded = quote! {
+        impl<K, V> soroban_tools::fsm::TransitionHandler<K, V> for #ty
+        where
+            K: Clone
+                + soroban_sdk::IntoVal<soroban_sdk::Env, soroban_sdk::Val>
+                + soroban_sdk::TryFromVal<soroban_sdk::Env, soroban_sdk::Val>,
+            V: Clone
+                + soroban_sdk::IntoVal<soroban_sdk::Env, soroban_sdk::Val>
+                + soroban_sdk::TryFromVal<soroban_sdk::Env, soroban_sdk::Val>,
+        {
+            fn on_guard(&self, _env: &soroban_sdk::Env, _state_machine: &soroban_tools::fsm::StateMachine<K, V>) {
+            }
+
+            fn on_effect(&self, _env: &soroban_sdk::Env, _state_machine: &soroban_tools::fsm::StateMachine<K, V>) {
+            }
+        }
+    };
+    expanded.into()
+}
 
 pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
     let args = parse_macro_input!(attr as AttributeArgs);

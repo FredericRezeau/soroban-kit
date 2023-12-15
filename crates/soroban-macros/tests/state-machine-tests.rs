@@ -18,11 +18,8 @@ mod tests {
         contract, contractimpl, contracttype, testutils::Address as _, Address, Env,
     };
 
-    use soroban_macros::state_machine;
-    use soroban_tools::{
-        fsm,
-        fsm::{StateMachine, TransitionHandler},
-    };
+    use soroban_macros::{state_machine, TransitionHandler};
+    use soroban_tools::{fsm, fsm::{StateMachine, TransitionHandler}};
 
     use std::panic::catch_unwind;
 
@@ -48,14 +45,13 @@ mod tests {
         Private(Address),
     }
 
+    #[derive(TransitionHandler)]
     pub struct GamingLobby;
 
-    impl TransitionHandler<Room, State> for GamingLobby {
-        // Called immediately before state validation.
-        // Used to implement guard conditions for the transition.
+    impl GamingLobby {
+
         fn on_guard(&self, env: &Env, state_machine: &StateMachine<Room, State>) {
             // E.g., Use this handler to implement time based transitions.
-
             let state = state_machine.get_state(&env).unwrap();
             let room = state_machine.get_region();
             match room {
@@ -71,13 +67,6 @@ mod tests {
             }
         }
 
-        // Called immediately after state validation iff validation succeeded.
-        // Used to implement the effect (immediate action) from transitioning.
-        // This code block has precedence over the attributed function body.
-        fn on_effect(&self, _env: &Env, _state_machine: &StateMachine<Room, State>) {}
-    }
-
-    impl GamingLobby {
         // This function panics when gaming lobby state is not State:Opened.
         #[state_machine(state = "State:Opened", region = "Room:Public")]
         fn login(&self, env: &Env, account: &Address) {
@@ -85,28 +74,19 @@ mod tests {
         }
 
         // This function panics when gaming lobby state is not State:Ready.
-        #[state_machine(
-            state = "State:Ready",
-            region = "Room:Private:account"
-        )]
+        #[state_machine(state = "State:Ready", region = "Room:Private:account")]
         fn play(&self, env: &Env, account: &Address, item: &Game) {
             self.set_state(&env, State::Playing(item.clone()), &account);
         }
 
         // This function panics when gaming lobby
         // state is not State:Playing(Game), the tuple runtime value must match.
-        #[state_machine(
-            state = "State:Playing:item",
-            region = "Room:Private:account"
-        )]
+        #[state_machine(state = "State:Playing:item", region = "Room:Private:account")]
         fn rage_quit(&self, env: &Env, account: &Address, item: &Game) {}
 
         // This function panics when gaming lobby
         // state is not State:Playing(Game), the tuple runtime value must match.
-        #[state_machine(
-            state = "State:Playing:item",
-            region = "Room:Private:account"
-        )]
+        #[state_machine(state = "State:Playing:item", region = "Room:Private:account")]
         fn quit(&self, env: &Env, account: &Address, item: &Game) {}
 
         fn set_state(&self, env: &Env, state: State, account: &Address) {

@@ -41,6 +41,12 @@ pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
     fsm::state_machine(attr, item)
 }
 
+#[cfg(feature = "state-machine")]
+#[proc_macro_derive(TransitionHandler)]
+pub fn transition_handler_derive(input: TokenStream) -> TokenStream {
+    fsm::transition_handler_derive(input)
+}
+
 #[cfg(feature = "storage")]
 #[proc_macro_attribute]
 pub fn storage(attr: TokenStream, item: TokenStream) -> TokenStream {

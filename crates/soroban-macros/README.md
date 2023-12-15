@@ -15,7 +15,7 @@ Fast, lightweight functions and macros with lean, targeted functionality for Sor
       - [Background](#background)
       - [Documentation](#documentation)
       - [Examples](#examples)
-    - [Commitment scheme](#commitment-scheme)
+    - [Commitment Scheme](#commitment-scheme)
       - [Background](#background-1)
       - [Documentation](#documentation-1)
       - [Examples](#examples-1)
@@ -48,6 +48,8 @@ Leveraging Rust advanced type system, soroban-kit `state-machine` can handle com
 
 #### Documentation
 
+Configure a function for state transition within your finite state machine.
+
 `#[state-machine]` options:
 - `state`: StatePath := EnumName ":" VariantName [":" TupleVariableName]
 - `region`: RegionPath := EnumName ":" VariantName [":" TupleVariableName]
@@ -61,13 +63,29 @@ Leveraging Rust advanced type system, soroban-kit `state-machine` can handle com
     }
 ```
 
+Use the `TransitionHandler` trait to control state transitions with guards and effects.
+
+```rust
+#[derive(TransitionHandler)]
+pub struct MyStateMachine;
+
+impl MyStateMachine {
+    // Implement to provide guard conditions for the transition
+    // (e.g., ledger sequence or time-based guards).
+    fn on_guard(/* omitted parameters */) {}
+
+    // Implement the effect from transitioning.
+    fn on_effect(/* omitted parameters */) {}
+}
+```
+
 #### Examples
 
 - [Polling Station Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs)
 - [Game Lobby Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/state-machine-tests.rs)
 - [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
 
-### Commitment scheme
+### Commitment Scheme
 
 ```toml
 [dependencies]
@@ -164,6 +182,7 @@ The `storage` macros streamline this process by automatically generating the boi
 
 #### Examples
 
+- [Walkthrough Video](https://www.youtube.com/watch?v=YZbI0MnyskE)
 - [Integration Tests](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/storage-tests.rs)
 - [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
 
