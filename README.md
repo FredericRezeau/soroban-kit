@@ -153,7 +153,7 @@ soroban-kit = { version = "0.1.5", default-features = false, features = ["circui
 
 The `when_opened` and `when_closed` attribute macros provide a streamlined way to integrate the circuit breaker pattern into your Soroban smart contracts.
 
-These macros, also leveraging the `state-machine` module, enable detailed control over state transitions (see [circuit-breaker.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/src/circuit-breaker.rs)) and the construction of composite circuits (i.e., grouping operations in sub circuits).
+These macros, also leveraging the `state-machine` module, enable detailed control over state transitions (see [circuit_breaker.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/src/circuit_breaker.rs)) and the construction of composite circuits (i.e., grouping operations in sub circuits).
 
 #### Background
 

@@ -7,7 +7,7 @@
 
 This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/soroban-kit) | [crates.io](https://crates.io/crates/soroban-kit).
 
-Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development. All modules are [feature flagged](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section), compile just what you need and nothing more (See [Library Footprint]() section for details).
+Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development. All modules are [feature flagged](https://doc.rust-lang.org/cargo/reference/features.html#the-features-section), compile just what you need and nothing more.
 
 - [soroban-tools](#soroban-tools)
   - [Features](#features)
@@ -155,7 +155,7 @@ soroban-kit = { version = "0.1.5", default-features = false, features = ["circui
 
 The `when_opened` and `when_closed` attribute macros provide a streamlined way to integrate the circuit breaker pattern into your Soroban smart contracts.
 
-These macros, also leveraging the `state-machine` module, enable detailed control over state transitions (see [circuit-breaker.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/src/circuit-breaker.rs)) and the construction of composite circuits (i.e., grouping operations in sub circuits).
+These macros, also leveraging the `state-machine` module, enable detailed control over state transitions (see [circuit_breaker.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/src/circuit_breaker.rs)) and the construction of composite circuits (i.e., grouping operations in sub circuits).
 
 #### Background
 
