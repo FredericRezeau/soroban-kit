@@ -18,7 +18,7 @@ use soroban_sdk::{
 
 use soroban_kit::{
     commit, fsm, fsm::StateMachine, key_constraint, reveal, soroban_tools, state_machine, storage,
-    TransitionHandler,
+    when_closed, when_opened, CircuitBreaker, TransitionHandler,
 };
 
 #[contract]
@@ -237,8 +237,101 @@ impl RockPaperScissors {
     }
 }
 
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum CircuitRegion {
+    Users(Address),
+}
+
+#[derive(CircuitBreaker)]
+pub struct Circuit;
+
+impl Circuit {
+    #[when_opened]
+    fn can_call_when_opened(&self, env: &Env) {}
+
+    #[when_closed]
+    fn can_call_when_closed(&self, env: &Env) {}
+
+    #[when_opened(trigger = true)]
+    fn set_closed(&self, env: &Env) {}
+
+    #[when_closed(trigger = true)]
+    fn set_opened(&self, env: &Env) {}
+
+    #[when_opened(region = "CircuitRegion:Users:addr")]
+    fn can_call_when_opened_for_addr(&self, env: &Env, addr: &Address) {}
+
+    #[when_closed(region = "CircuitRegion:Users:addr")]
+    fn can_call_when_closed_for_addr(&self, env: &Env, addr: &Address) {}
+
+    #[when_opened(trigger = true, region = "CircuitRegion:Users:addr")]
+    fn set_closed_for_addr(&self, env: &Env, addr: &Address) {}
+
+    #[when_closed(trigger = true, region = "CircuitRegion:Users:addr")]
+    fn set_opened_for_addr(&self, env: &Env, addr: &Address) {}
+}
+
 #[contractimpl]
 impl TestContract {
+    pub fn hello_circuit_breaker(env: Env) {
+        let circuit = Circuit;
+                
+        // The circuit is closed by default, these should panic.
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            circuit.can_call_when_opened(&env);
+            circuit.set_closed(&env);
+        }));
+        assert!(
+            result.is_err(),
+            "The operation should panic. Incorrect state"
+        );
+
+        circuit.can_call_when_closed(&env);
+        circuit.set_opened(&env);
+
+        // The circuit is now opened, these should panic.
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            circuit.can_call_when_closed(&env);
+            circuit.set_opened(&env);
+        }));
+        assert!(
+            result.is_err(),
+            "The operation should panic. Incorrect state"
+        );
+
+        circuit.can_call_when_opened(&env);
+        circuit.set_closed(&env);
+
+        // The circuit is closed by default, these should panic.
+        let addr = Address::generate(&env);
+
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            circuit.can_call_when_opened_for_addr(&env, &addr);
+            circuit.set_closed_for_addr(&env, &addr);
+        }));
+        assert!(
+            result.is_err(),
+            "The operation should panic. Incorrect state"
+        );
+
+        circuit.can_call_when_closed_for_addr(&env, &addr);
+        circuit.set_opened_for_addr(&env, &addr);
+
+        // The circuit is now opened, these should panic.
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            circuit.can_call_when_closed_for_addr(&env, &addr);
+            circuit.set_opened_for_addr(&env, &addr);
+        }));
+        assert!(
+            result.is_err(),
+            "The operation should panic. Incorrect state"
+        );
+
+        circuit.can_call_when_opened_for_addr(&env, &addr);
+        circuit.set_closed_for_addr(&env, &addr);
+    }
+
     pub fn hello_commit_reveal(env: Env) {
         // This example demonstrates the use of a commitment scheme in a Rock-Paper-Scissors game smart contract.
 
@@ -388,4 +481,11 @@ fn test_soroban_kit_hello_storage() {
 fn test_soroban_kit_hello_commit_reveal() {
     let env = Env::default();
     TestContractClient::new(&env, &env.register_contract(None, TestContract)).hello_commit_reveal();
+}
+
+#[test]
+fn test_soroban_kit_hello_circuit_breaker() {
+    let env = Env::default();
+    TestContractClient::new(&env, &env.register_contract(None, TestContract))
+        .hello_circuit_breaker();
 }

@@ -19,26 +19,30 @@ mod commit;
 #[cfg(feature = "state-machine")]
 mod fsm;
 
+/// CircuitBreaker procedural macros implementation.
+#[cfg(feature = "circuit-breaker")]
+mod circuit_breaker;
+
 /// Storage procedural macros implementation.
 #[cfg(feature = "storage")]
 mod storage;
 
 #[cfg(feature = "commitment-scheme")]
 #[proc_macro_attribute]
-pub fn commit(attr: TokenStream, item: TokenStream) -> TokenStream {
-    commit::commit(attr, item)
+pub fn commit(attr: TokenStream, input: TokenStream) -> TokenStream {
+    commit::commit(attr, input)
 }
 
 #[cfg(feature = "commitment-scheme")]
 #[proc_macro_attribute]
-pub fn reveal(attr: TokenStream, item: TokenStream) -> TokenStream {
-    commit::reveal(attr, item)
+pub fn reveal(attr: TokenStream, input: TokenStream) -> TokenStream {
+    commit::reveal(attr, input)
 }
 
 #[cfg(feature = "state-machine")]
 #[proc_macro_attribute]
-pub fn state_machine(attr: TokenStream, item: TokenStream) -> TokenStream {
-    fsm::state_machine(attr, item)
+pub fn state_machine(attr: TokenStream, input: TokenStream) -> TokenStream {
+    fsm::state_machine(attr, input)
 }
 
 #[cfg(feature = "state-machine")]
@@ -49,12 +53,30 @@ pub fn transition_handler_derive(input: TokenStream) -> TokenStream {
 
 #[cfg(feature = "storage")]
 #[proc_macro_attribute]
-pub fn storage(attr: TokenStream, item: TokenStream) -> TokenStream {
-    storage::storage(attr, item)
+pub fn storage(attr: TokenStream, input: TokenStream) -> TokenStream {
+    storage::storage(attr, input)
 }
 
 #[cfg(feature = "storage")]
 #[proc_macro_attribute]
-pub fn key_constraint(attr: TokenStream, item: TokenStream) -> TokenStream {
-    storage::key_constraint(attr, item)
+pub fn key_constraint(attr: TokenStream, input: TokenStream) -> TokenStream {
+    storage::key_constraint(attr, input)
+}
+
+#[cfg(feature = "circuit-breaker")]
+#[proc_macro_attribute]
+pub fn when_opened(attr: TokenStream, input: TokenStream) -> TokenStream {
+    circuit_breaker::when(attr, input, true)
+}
+
+#[cfg(feature = "circuit-breaker")]
+#[proc_macro_attribute]
+pub fn when_closed(attr: TokenStream, input: TokenStream) -> TokenStream {
+    circuit_breaker::when(attr, input, false)
+}
+
+#[cfg(feature = "circuit-breaker")]
+#[proc_macro_derive(CircuitBreaker)]
+pub fn circuit_breaker_derive(input: TokenStream) -> TokenStream {
+    circuit_breaker::derive(input)
 }

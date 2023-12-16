@@ -10,6 +10,9 @@
 #[cfg(feature = "state-machine")]
 pub mod fsm;
 
+#[cfg(feature = "circuit-breaker")]
+pub mod circuit_breaker;
+
 #[cfg(feature = "storage")]
 pub mod storage;
 

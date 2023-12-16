@@ -5,6 +5,7 @@
 **/.rustc_info.json
 **/*.rs.bk
 **/.vscode/
+/.footprint
 
 .DS_Store
 Thumbs.db

@@ -17,9 +17,9 @@ use soroban_tools::impl_key_constraint;
 #[allow(unused_imports)]
 use soroban_tools::impl_storage;
 
-pub fn storage(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn storage(attr: TokenStream, input: TokenStream) -> TokenStream {
     let args = parse_macro_input!(attr as AttributeArgs);
-    let input = parse_macro_input!(item as ItemStruct);
+    let input = parse_macro_input!(input as ItemStruct);
     let storage_type = match args.first() {
         Some(syn::NestedMeta::Meta(syn::Meta::Path(p))) => quote! { #p },
         _ => panic!("Expected a storage type (Instance, Persistent, Temporary)"),
@@ -47,9 +47,9 @@ pub fn storage(attr: TokenStream, item: TokenStream) -> TokenStream {
     output.into()
 }
 
-pub fn key_constraint(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn key_constraint(attr: TokenStream, input: TokenStream) -> TokenStream {
     let args = parse_macro_input!(attr as AttributeArgs);
-    let input = parse_macro_input!(item as DeriveInput);
+    let input = parse_macro_input!(input as DeriveInput);
     if args.len() != 1 {
         panic!("Expected one argument: trait");
     }

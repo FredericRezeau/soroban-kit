@@ -9,7 +9,7 @@
 use core::marker::PhantomData;
 use soroban_sdk::{contracttype, Env, IntoVal, TryFromVal, Val};
 
-// Control the state transition process flow.
+// Control state transitions for the state machine.
 pub trait TransitionHandler<K, V>
 where
     K: Clone + IntoVal<Env, Val> + TryFromVal<Env, Val>,

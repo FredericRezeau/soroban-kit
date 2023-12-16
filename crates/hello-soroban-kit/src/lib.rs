@@ -13,11 +13,12 @@ mod types; // Contract types.
 
 use soroban_sdk::{contract, contractimpl, Env, Symbol, Vec};
 
-use examples::{example_rock_paper_scissors, example_storage};
+use examples::{example_circuit_breaker, example_rock_paper_scissors, example_storage};
 
 pub trait HelloContractTrait {
-    fn rock_paper_scissors(env: Env);
-    fn hello(env: Env, newcomer: Symbol) -> Vec<Symbol>;    
+    fn circuit_breaker(env: Env) -> Symbol;
+    fn rock_paper_scissors(env: Env) -> Symbol;
+    fn hello(env: Env, newcomer: Symbol) -> Vec<Symbol>;
 }
 
 #[contract]
@@ -25,13 +26,19 @@ pub struct HelloContract;
 
 #[contractimpl]
 impl HelloContractTrait for HelloContract {
-    // Example implementing "rock paper scissors" with
-    // soroban-kit `state-machine, `commit` and `reveal`.
-    fn rock_paper_scissors(env: Env) {
-        example_rock_paper_scissors::hello(env);
+    // Example implementing a pausable activity with
+    // soroban-kit `circuit-breaker`, `when_opened` and `when_closed` attr. macros.
+    fn circuit_breaker(env: Env) -> Symbol {
+        example_circuit_breaker::hello(env)
     }
 
-    // Example saying hello with soroban-kit type safe `storage`.
+    // Example implementing "rock paper scissors" with
+    // soroban-kit `state-machine`, `commit` and `reveal` attr. macros.
+    fn rock_paper_scissors(env: Env) -> Symbol {
+        example_rock_paper_scissors::hello(env)
+    }
+
+    // Example saying hello with soroban-kit type safe `storage` attr. macros.
     fn hello(env: Env, newcomer: Symbol) -> Vec<Symbol> {
         example_storage::hello(env, newcomer)
     }

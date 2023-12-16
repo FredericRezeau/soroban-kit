@@ -21,12 +21,12 @@
 // Additionally, the soroban-kit `state-machine` macro is used to model the game's state transitions
 // with concurrency and extended states to allow players to play in any order.
 
-use soroban_sdk::{bytes, Bytes, BytesN, Env};
+use soroban_sdk::{bytes, symbol_short, Bytes, BytesN, Env, Symbol,};
 
 use soroban_kit::{
     commit,
     fsm::{StateMachine, StorageType},
-    reveal, soroban_tools, state_machine, TransitionHandler
+    reveal, soroban_tools, state_machine, TransitionHandler,
 };
 
 use crate::types::{Domain, Phase, Player};
@@ -35,7 +35,6 @@ use crate::types::{Domain, Phase, Player};
 pub struct RockPaperScissors;
 
 impl RockPaperScissors {
-
     // TransitionHandler::on_effect
     // Called immediately after state validation iff validation succeeded.
     // Used to implement the effect from transitioning.
@@ -108,7 +107,9 @@ impl RockPaperScissors {
 
     // Solve phase.
     #[state_machine(state = "Phase:End", region = "Domain:Game")]
-    fn solve(&self, env: &Env) {}
+    fn solve(&self, env: &Env) -> Symbol {
+        symbol_short!("Success")
+    }
 
     fn reset_player(&self, env: &Env, player: Player) {
         let domain = Domain::Players(player.clone());
@@ -118,7 +119,7 @@ impl RockPaperScissors {
     }
 }
 
-pub fn hello(env: Env) {
+pub fn hello(env: Env) -> Symbol {
     // First, we initialize two player accounts.
     let player_one = Player::Alice;
     let player_two = Player::Bob;
@@ -154,5 +155,5 @@ pub fn hello(env: Env) {
     game.reveal(&env, &player_two, &data_player_two);
 
     // All players data revealed, we can solve the game.
-    game.solve(&env);
+    game.solve(&env)
 }

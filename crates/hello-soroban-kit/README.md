@@ -6,7 +6,11 @@
 
 This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/soroban-kit) | [crates.io](https://crates.io/crates/soroban-kit).
 
-`hello-soroban-kit` is a Soroban smart contract demo showcasing the use of all features in `soroban-kit`.
+`hello-soroban-kit` is a Soroban smart contract demo showcasing the use of all features in `soroban-kit` including `state-machine`, `commitment-scheme`, `circuit-breaker` and `storage`.
+
+`soroban-kit` is designed for blockchain environments, prioritizing compactness and lightweight constructs. The library solely depends on the dependency-free Rust `core` library and the `soroban-sdk`. Every module is feature-gated to allow selective compilation based on your specific needs.
+
+Take a look at [Litemint Smart Contracts]([src/lib.rs](https://github.com/litemint/litemint-soroban-contracts)) to see an integration of the library in real-world Soroban smart contracts.
 
 ## Commands
 
@@ -23,16 +27,33 @@ This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/
    ```sh
    soroban contract deploy --wasm target/wasm32-unknown-unknown/release/hello_soroban_kit.wasm --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" --source ACCOUNT
    ```
-    ```sh
+   ```sh
    output > CONTRACT_ID
    ```
 4. Invoking the contract:
    
+   Just say hello with storage type-safety!
    ```sh
    soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- hello --newcomer TESTER
    ```
    ```sh
    output > ["Hello","TESTER"]
+   ```
+
+   Play rock paper scissors!
+   ```sh
+   soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- rock_paper_scissors
+   ```
+   ```sh
+   output > "Success"
+   ```
+
+   Flip the switch on a circuit!
+   ```sh
+   soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- circuit_breaker
+   ```
+   ```sh
+   output > "Success"
    ```
 5. Check out [lib.rs](src/lib.rs) and [test.rs](src/test.rs) for detailed integration examples.
    

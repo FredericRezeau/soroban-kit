@@ -11,9 +11,9 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, AttributeArgs, ItemFn, Lit, Meta, NestedMeta};
 
-pub fn commit(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn commit(attr: TokenStream, input: TokenStream) -> TokenStream {
     let args = parse_macro_input!(attr as AttributeArgs);
-    let mut input_fn = parse_macro_input!(item as ItemFn);
+    let mut input_fn = parse_macro_input!(input as ItemFn);
     let mut hash_name = "hash".to_string();
     let mut storage_name = "instance".to_string();
 
@@ -67,9 +67,9 @@ pub fn commit(attr: TokenStream, item: TokenStream) -> TokenStream {
     TokenStream::from(quote!(#input_fn))
 }
 
-pub fn reveal(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn reveal(attr: TokenStream, input: TokenStream) -> TokenStream {
     let args = parse_macro_input!(attr as AttributeArgs);
-    let mut input_fn = parse_macro_input!(item as ItemFn);
+    let mut input_fn = parse_macro_input!(input as ItemFn);
     let mut data_name = "data".to_string();
     let mut hash_func_name = "sha256".to_string();
     let mut storage_name = "instance".to_string();

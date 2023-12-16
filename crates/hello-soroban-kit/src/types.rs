@@ -41,6 +41,7 @@ pub enum State {
 pub enum Region {
     Global,
     Specific(i32),
+    Circuit,
 }
 
 #[contracttype]

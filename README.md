@@ -17,10 +17,14 @@ Fast, lightweight functions and macros with lean, targeted functionality for Sor
       - [Background](#background-1)
       - [Documentation](#documentation-1)
       - [Examples](#examples-1)
-    - [Type Safe Storage](#type-safe-storage)
+    - [Circuit Breaker](#circuit-breaker)
       - [Background](#background-2)
       - [Documentation](#documentation-2)
       - [Examples](#examples-2)
+    - [Type Safe Storage](#type-safe-storage)
+      - [Background](#background-3)
+      - [Documentation](#documentation-3)
+      - [Examples](#examples-3)
   - [Smart Contract Demo](#smart-contract-demo)
   - [Contributing](#contributing)
   - [License](#license)
@@ -33,7 +37,7 @@ Fast, lightweight functions and macros with lean, targeted functionality for Sor
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.4", default-features = false, features = ["state-machine"] }
+soroban-kit = { version = "0.1.5", default-features = false, features = ["state-machine"] }
 ```
 
 The `state-machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions (composite states), runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
@@ -64,17 +68,17 @@ Configure a function for state transition within your finite state machine.
 Use the `TransitionHandler` trait to control state transitions with guards and effects.
 
 ```rust
-#[derive(TransitionHandler)]
-pub struct MyStateMachine;
+    #[derive(TransitionHandler)]
+    pub struct MyStateMachine;
 
-impl MyStateMachine {
-    // Implement to provide guard conditions for the transition
-    // (e.g., ledger sequence or time-based guards).
-    fn on_guard(/* omitted parameters */) {}
+    impl MyStateMachine {
+        // Implement to provide guard conditions for the transition
+        // (e.g., ledger sequence or time-based guards).
+        fn on_guard(/* omitted parameters */) {}
 
-    // Implement the effect from transitioning.
-    fn on_effect(/* omitted parameters */) {}
-}
+        // Implement the effect from transitioning.
+        fn on_effect(/* omitted parameters */) {}
+    }
 ```
 
 #### Examples
@@ -87,22 +91,22 @@ impl MyStateMachine {
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.4", default-features = false, features = ["commitment-scheme"] }
+soroban-kit = { version = "0.1.5", default-features = false, features = ["commitment-scheme"] }
 ```
 The `commit` and `reveal` attribute macros are designed to easily implement the commitment scheme in your Soroban smart contract. They use the soroban-sdk _sha256_ or _keccak256_ hash functions and storage with automatic hash removal.
 
 These attributes can also be paired with the `state-machine` attribute to manage the commitment and reveal phases for multiple parties. For a comprehensive demo of such pairing, refer to the [Polling Station](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs) example.
 
 ```rust
-        #[commit]
-        #[state_machine(state = "Phase:Committing")]
-        fn vote(&self, env: &Env, hash: &BytesN<32>) {
-        }
+    #[commit]
+    #[state_machine(state = "Phase:Committing")]
+    fn vote(&self, env: &Env, hash: &BytesN<32>) {
+    }
 
-        #[reveal]
-        #[state_machine(state = "Phase:Revealing")]
-        fn reveal(&self, env: &Env, data: &Bytes) {
-        }
+    #[reveal]
+    #[state_machine(state = "Phase:Revealing")]
+    fn reveal(&self, env: &Env, data: &Bytes) {
+    }
 ```
 
 #### Background
@@ -118,8 +122,8 @@ The `commit` and `reveal` macros in `soroban-kit` allow a boilerplate-free imple
 - `storage`: "instance" (default) | "persistent" | "temporary"
 ```rust
     // Example
-    #[commit(hash = "commit_hash")]
-    fn my_commit_function(env: &Env, commit_hash: &BytesN<32>) {
+    #[commit]
+    fn my_commit_function(env: &Env, hash: &BytesN<32>) {
     }
 ```
 
@@ -130,8 +134,8 @@ The `commit` and `reveal` macros in `soroban-kit` allow a boilerplate-free imple
 - `storage`: "instance" (default) | "persistent" | "temporary"
 ```rust
     // Example
-    #[reveal(data = "reveal_data")]
-    fn my_reveal_function(env: &Env, reveal_data: &Bytes) {
+    #[reveal]
+    fn my_reveal_function(env: &Env, data: &Bytes) {
     }
 ```
 
@@ -140,11 +144,75 @@ The `commit` and `reveal` macros in `soroban-kit` allow a boilerplate-free imple
 - [Polling Station Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs)
 - [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
 
+### Circuit Breaker
+
+```toml
+[dependencies]
+soroban-kit = { version = "0.1.5", default-features = false, features = ["circuit-breaker"] }
+```
+
+The `when_opened` and `when_closed` attribute macros provide a streamlined way to integrate the circuit breaker pattern into your Soroban smart contracts.
+
+These macros, also leveraging the `state-machine` module, enable detailed control over state transitions (see [circuit-breaker.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/src/circuit-breaker.rs)) and the construction of composite circuits (i.e., grouping operations in sub circuits).
+
+#### Background
+
+In the context of smart contracts, the circuit breaker pattern serves as a vital security mechanism, safeguarding stakeholders in the event of unexpected contract behavior or external attacks. This pattern is prevalent in Solidity smart contracts, notably through the popular [Pausable contract](https://docs.openzeppelin.com/contracts/2.x/api/lifecycle) module from OpenZeppelin.
+
+`soroban-kit` macros allow a straightforward implementation of the circuit-breaker pattern for any operation and subset of operations in your contract.
+
+
+#### Documentation
+
+`#[when_opened]` / `#[when_closed]` options:
+- `region`: RegionPath := EnumName ":" VariantName [":" TupleVariableName]
+- `trigger`: A boolean to indicate if the function call should trigger a state change (default: false).
+
+```rust
+    struct Circuit {
+        // bid() is usable when the circuit is closed (operational).
+        #[when_closed]
+        fn bid(&self, env: &Env) {
+        }
+
+        // emergency_stop() triggers a state change.
+        #[when_closed(trigger = true)]
+        fn emergency_stop(&self, env: &Env) {
+        }
+
+        // upgrade() also restores bid() operation.
+        #[when_opened(trigger = true)]
+        fn upgrade(&self, env: &Env) {
+          // e.g., upgrade contract.
+        }
+    }
+```
+
+Control state transitions with guards and effects.
+
+```rust
+    #[derive(CircuitBreaker)]
+    struct Circuit;
+
+    impl Circuit {
+        // Define guard conditions for state transitions (open/close).
+        fn on_guard(/* omitted parameters */) {}
+
+        // Define effects of state transitions
+        fn on_effect(/* omitted parameters */) {}
+    }
+```
+
+#### Examples
+
+- [Circuit Breaker Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit/src/examples/example_circuit_breaker.rs)
+- [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
+
 ### Type Safe Storage
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.4", default-features = false, features = ["storage"] }
+soroban-kit = { version = "0.1.5", default-features = false, features = ["storage"] }
 ```
 
 The `storage` and `key_constraint` macros generate a minimal wrapper (see [storage/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
@@ -195,7 +263,6 @@ Contributions are welcome! If you have a suggestion that would make this better,
 ## License
 
 `soroban-kit` is licensed under the MIT License. See [LICENSE](LICENSE) for more details.
-
 
 ## Contact
 

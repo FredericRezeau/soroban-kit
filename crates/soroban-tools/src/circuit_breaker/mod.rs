@@ -6,6 +6,6 @@
     MIT License
 */
 
-pub mod example_storage;
-pub mod example_rock_paper_scissors;
-pub mod example_circuit_breaker;
+#[macro_use]
+mod r#impl;
+pub use r#impl::*;
