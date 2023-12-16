@@ -169,7 +169,10 @@ In the context of smart contracts, the circuit breaker pattern serves as a vital
 - `trigger`: A boolean to indicate if the function call should trigger a state change (default: false).
 
 ```rust
-    struct Circuit {
+    #[derive(CircuitBreaker)]
+    struct Circuit; 
+    
+    impl Circuit {
         // bid() is usable when the circuit is closed (operational).
         #[when_closed]
         fn bid(&self, env: &Env) {
@@ -191,9 +194,6 @@ In the context of smart contracts, the circuit breaker pattern serves as a vital
 Control state transitions with guards and effects.
 
 ```rust
-    #[derive(CircuitBreaker)]
-    struct Circuit;
-
     impl Circuit {
         // Define guard conditions for state transitions (open/close).
         fn on_guard(/* omitted parameters */) {}
