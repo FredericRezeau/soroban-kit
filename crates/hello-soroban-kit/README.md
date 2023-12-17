@@ -2,15 +2,15 @@
 [![Twitter][twitter-shield]][twitter-url]
 
 # hello-soroban-kit
-[![Build Status](https://app.travis-ci.com/FredericRezeau/soroban-kit.svg?branch=main)](https://app.travis-ci.com/FredericRezeau/soroban-kit)
+[![Build Status](https://app.travis-ci.com/FredericRezeau/soroban-kit.svg?branch=main)](https://app.travis-ci.com/FredericRezeau/soroban-kit) [![Current Crates.io Version](https://img.shields.io/crates/v/soroban-kit.svg)](https://crates.io/crates/soroban-kit)
 
 This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/soroban-kit) | [crates.io](https://crates.io/crates/soroban-kit).
 
 `hello-soroban-kit` is a Soroban smart contract demo showcasing the use of all features in `soroban-kit` including `state-machine`, `commitment-scheme`, `circuit-breaker` and `storage`.
 
-`soroban-kit` is designed for blockchain environments, prioritizing compactness and lightweight constructs. The library solely depends on the dependency-free Rust `core` library and the `soroban-sdk`. Every module is feature-gated to allow selective compilation based on your specific needs.
+`soroban-kit` is designed for compactness, focusing on slim constructs. It is built on Rust's dependency-free `core` library and the `soroban-sdk`. All modules are feature-gated, offering you the flexibility to compile only the components essential for your project.
 
-Take a look at [Litemint Smart Contracts]([src/lib.rs](https://github.com/litemint/litemint-soroban-contracts)) to see an integration of the library in real-world Soroban smart contracts.
+Take a look at [Litemint Smart Contracts]([src/lib.rs](https://github.com/litemint/litemint-soroban-contracts)) to see an integration of the library in real-world smart contracts.
 
 ## Commands
 

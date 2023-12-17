@@ -93,13 +93,19 @@ mod tests {
             let region = Room::Private(account.clone());
             let state_machine =
                 StateMachine::<Room, State>::new(&region, fsm::StorageType::Instance);
-            state_machine.set_state(&env, state);
+            state_machine.set_state(&env, &state);
         }
 
         fn open(&self, env: &Env) {
             let state_machine =
                 StateMachine::<Room, State>::new(&Room::Public, fsm::StorageType::Instance);
-            state_machine.set_state(&env, State::Opened);
+            state_machine.set_state(&env, &State::Opened);
+        }
+
+        fn close(&self, env: &Env) {
+            let state_machine =
+                StateMachine::<Room, State>::new(&Room::Public, fsm::StorageType::Instance);
+            state_machine.remove_state(&env);
         }
     }
 
@@ -139,6 +145,8 @@ mod tests {
 
             gaming_lobby.quit(&env, &player1, &Game::WorldOfWarcraft);
             gaming_lobby.quit(&env, &player2, &Game::LeagueOfLegends);
+
+            gaming_lobby.close(&env);
         }
     }
 

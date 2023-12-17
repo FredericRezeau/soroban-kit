@@ -106,7 +106,7 @@ mod tests {
             let phase = Phase::Committing(voter.clone());
             let state_machine =
                 StateMachine::<Domain, Phase>::new(&domain, fsm::StorageType::Instance);
-            state_machine.set_state(&env, phase);
+            state_machine.set_state(&env, &phase);
         }
     }
 
@@ -121,11 +121,11 @@ mod tests {
                     match phase {
                         Phase::Committing(_) => {
                             // Voted, transition to revealing phase.
-                            state_machine.set_state(&env, Phase::Revealing(voter));
+                            state_machine.set_state(&env, &Phase::Revealing(voter));
                         }
                         Phase::Revealing(_) => {
                             // Revealed, transition to completed phase.
-                            state_machine.set_state(&env, Phase::Completed(voter));
+                            state_machine.set_state(&env, &Phase::Completed(voter));
 
                             // Close the polling station if all voted.
                             let all_voted = voters.iter().all(|voter| {
@@ -144,7 +144,7 @@ mod tests {
                                     &Domain::Station,
                                     fsm::StorageType::Instance,
                                 );
-                                sm.set_state(env, Phase::Closed);
+                                sm.set_state(env, &Phase::Closed);
                             }
                         }
                         _ => {}

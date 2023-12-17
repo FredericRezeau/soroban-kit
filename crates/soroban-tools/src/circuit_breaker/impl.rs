@@ -35,11 +35,11 @@ macro_rules! impl_circuit_breaker_state_machine {
         $region_key:expr, $state_enum:ty, $region_enum:ty) => {
             let sm = $crate::fsm::StateMachine::<$region_enum, $state_enum>::new(&$region_key, $storage_type);
             if $trigger {
-                sm.set_state($env, $state_key);
+                sm.set_state($env, &$state_key);
             }
             else {
                 if sm.get_state($env).is_none() {
-                    sm.set_state($env, false); // Default circuit state is closed (false).
+                    sm.set_state($env, &false); // Default circuit state is closed (false).
                 }
                 $instance.on_guard($env, &sm);
                 match sm.get_state(&$env) {

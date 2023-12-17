@@ -58,20 +58,20 @@ where
         &self.storage_type
     }
 
-    pub fn set_state(&self, env: &Env, value: V) {
+    pub fn set_state(&self, env: &Env, value: &V) {
         match self.storage_type {
             StorageType::Instance => env
                 .storage()
                 .instance()
-                .set(&self.region.into_val(env), &value),
+                .set(&self.region.into_val(env), value),
             StorageType::Persistent => env
                 .storage()
                 .persistent()
-                .set(&self.region.into_val(env), &value),
+                .set(&self.region.into_val(env), value),
             StorageType::Temporary => env
                 .storage()
                 .temporary()
-                .set(&self.region.into_val(env), &value),
+                .set(&self.region.into_val(env), value),
         }
     }
 
@@ -80,6 +80,14 @@ where
             StorageType::Instance => env.storage().instance().get(&self.region.into_val(env)),
             StorageType::Persistent => env.storage().persistent().get(&self.region.into_val(env)),
             StorageType::Temporary => env.storage().temporary().get(&self.region.into_val(env)),
+        }
+    }
+
+    pub fn remove_state(&self, env: &Env) {
+        match self.storage_type {
+            StorageType::Instance => env.storage().instance().remove(&self.region.into_val(env)),
+            StorageType::Persistent => env.storage().persistent().remove(&self.region.into_val(env)),
+            StorageType::Temporary => env.storage().temporary().remove(&self.region.into_val(env)),
         }
     }
 }

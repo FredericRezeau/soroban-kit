@@ -126,13 +126,13 @@ impl CoffeeMachine {
         let region = Region::Buyer(account.clone());
         let state_machine =
             StateMachine::<Region, State>::new(&region, fsm::StorageType::Temporary);
-        state_machine.set_state(&env, state);
+        state_machine.set_state(&env, &state);
     }
 
     fn refill(&self, env: &Env) {
         let state_machine =
             StateMachine::<Region, State>::new(&Region::All, fsm::StorageType::Temporary);
-        state_machine.set_state(&env, State::Refilled);
+        state_machine.set_state(&env, &State::Refilled);
     }
 }
 
@@ -172,11 +172,11 @@ impl RockPaperScissors {
                 match phase {
                     Phase::Committing(Player::Alice) => {
                         // Alice played, transition to revealing phase.
-                        state_machine.set_state(&env, Phase::Revealing(Player::Alice));
+                        state_machine.set_state(&env, &Phase::Revealing(Player::Alice));
                     }
                     Phase::Revealing(Player::Alice) => {
                         // Alice revealed, transition to completed phase.
-                        state_machine.set_state(&env, Phase::Completed(Player::Alice));
+                        state_machine.set_state(&env, &Phase::Completed(Player::Alice));
                         // If Bob also played, set game to End phase.
                         end_game_if_completed(&env, Player::Alice, Player::Bob);
                     }
@@ -187,11 +187,11 @@ impl RockPaperScissors {
                 match phase {
                     Phase::Committing(Player::Bob) => {
                         // Bob played, transition to revealing phase.
-                        state_machine.set_state(&env, Phase::Revealing(Player::Bob));
+                        state_machine.set_state(&env, &Phase::Revealing(Player::Bob));
                     }
                     Phase::Revealing(Player::Bob) => {
                         // Bob revealed, transition to completed phase.
-                        state_machine.set_state(&env, Phase::Completed(Player::Bob));
+                        state_machine.set_state(&env, &Phase::Completed(Player::Bob));
                         // If Alice also played, set game to End phase.
                         end_game_if_completed(&env, Player::Bob, Player::Alice);
                     }
@@ -209,7 +209,7 @@ impl RockPaperScissors {
                 Phase::Completed(player) if player == check_player => Phase::End,
                 _ => Phase::Completed(for_player),
             };
-            state_machine.set_state(env, next_phase);
+            state_machine.set_state(env, &next_phase);
         }
     }
 
@@ -233,7 +233,7 @@ impl RockPaperScissors {
         let domain = Domain::Players(player.clone());
         let phase = Phase::Committing(player.clone());
         let state_machine = StateMachine::<Domain, Phase>::new(&domain, fsm::StorageType::Instance);
-        state_machine.set_state(&env, phase);
+        state_machine.set_state(&env, &phase);
     }
 }
 

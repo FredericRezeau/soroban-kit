@@ -1,6 +1,6 @@
 [package]
 name = "soroban-macros"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development."
@@ -21,7 +21,7 @@ proc-macro2 = "1.0"
 
 [dependencies.soroban-tools]
 path = "../soroban-tools"
-version = "0.1.5"
+version = "0.1.6"
 optional = true
 default-features = false
 
