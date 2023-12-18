@@ -22,7 +22,7 @@ pub fn storage(attr: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemStruct);
     let storage_type = match args.first() {
         Some(syn::NestedMeta::Meta(syn::Meta::Path(p))) => quote! { #p },
-        _ => panic!("Expected a storage type (Instance, Persistent, Temporary)"),
+        _ => unimplemented!(),
     };
 
     let trait_ident = args.get(1).and_then(|arg| {
@@ -50,13 +50,12 @@ pub fn storage(attr: TokenStream, input: TokenStream) -> TokenStream {
 pub fn key_constraint(attr: TokenStream, input: TokenStream) -> TokenStream {
     let args = parse_macro_input!(attr as AttributeArgs);
     let input = parse_macro_input!(input as DeriveInput);
-    if args.len() != 1 {
-        panic!("Expected one argument: trait");
-    }
+
+    assert_eq!(args.len(), 1);
 
     let key_trait = match &args[0] {
         syn::NestedMeta::Meta(syn::Meta::Path(path)) => quote! { #path },
-        _ => panic!("Expected a trait name for the key_constraint macro"),
+        _ => panic!("Expected a trait"),
     };
 
     let type_ident = &input.ident;

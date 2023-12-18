@@ -2,7 +2,7 @@
 [![Twitter][twitter-shield]][twitter-url]
 
 # soroban-macros
-[![Build Status](https://app.travis-ci.com/FredericRezeau/soroban-kit.svg?branch=main)](https://app.travis-ci.com/FredericRezeau/soroban-kit)
+![Build Status](https://github.com/FredericRezeau/soroban-kit/actions/workflows/rust.yml/badge.svg)
 [![Current Crates.io Version](https://img.shields.io/crates/v/soroban-kit.svg)](https://crates.io/crates/soroban-kit)
 
 This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/soroban-kit) | [crates.io](https://crates.io/crates/soroban-kit).
@@ -43,7 +43,7 @@ Licensed under MIT. This software is provided "AS IS", no liability assumed. [Mo
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.6", default-features = false, features = ["state-machine"] }
+soroban-kit = { version = "0.1.7", default-features = false, features = ["state-machine"] }
 ```
 
 The `state-machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions (composite states), runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
@@ -97,7 +97,7 @@ impl MyStateMachine {
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.6", default-features = false, features = ["commitment-scheme"] }
+soroban-kit = { version = "0.1.7", default-features = false, features = ["commitment-scheme"] }
 ```
 The `commit` and `reveal` attribute macros are designed to easily implement the commitment scheme in your Soroban smart contract. They use the soroban-sdk _sha256_ or _keccak256_ hash functions and storage with automatic hash removal.
 
@@ -154,7 +154,7 @@ The `commit` and `reveal` macros in `soroban-kit` allow a boilerplate-free imple
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.6", default-features = false, features = ["circuit-breaker"] }
+soroban-kit = { version = "0.1.7", default-features = false, features = ["circuit-breaker"] }
 ```
 
 The `when_opened` and `when_closed` attribute macros provide a streamlined way to integrate the circuit breaker pattern into your Soroban smart contracts.
@@ -218,7 +218,7 @@ Control state transitions with guards and effects.
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.6", default-features = false, features = ["storage"] }
+soroban-kit = { version = "0.1.7", default-features = false, features = ["storage"] }
 ```
 
 The `storage` and `key_constraint` macros generate a minimal wrapper (see [storage/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.

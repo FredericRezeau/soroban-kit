@@ -1,6 +1,6 @@
 [package]
 name = "hello-soroban-kit"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Demo soroban smart contract for soroban-kit."
@@ -16,7 +16,7 @@ soroban-sdk = "20.0.0"
 
 [dependencies.soroban-kit]
 path = "../soroban-kit"
-version = "0.1.6"
+version = "0.1.7"
 default-features = false
 features = ["commitment-scheme", "storage", "state-machine", "circuit-breaker"]
 

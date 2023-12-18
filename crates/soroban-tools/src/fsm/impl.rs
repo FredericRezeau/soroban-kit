@@ -151,13 +151,7 @@ macro_rules! impl_state_machine {
     (@internal $instance:expr, $env:expr, $storage_type:expr, $state_key:expr, $region_key:expr, $state_enum:ty, $region_enum:ty) => {
         let sm = $crate::fsm::StateMachine::<$region_enum, $state_enum>::new(&$region_key, $storage_type);
         $instance.on_guard($env, &sm);
-        match sm.get_state(&$env) {
-            Some(current_state) if current_state != $state_key =>
-                panic!("Expected state {:?} but got {:?}", current_state, $state_key),
-            None =>
-                panic!("Expected state set in state-machine"),
-            _ => {}
-        }
+        assert_eq!(sm.get_state(&$env).unwrap(), $state_key);
         $instance.on_effect($env, &sm);
     };
 }

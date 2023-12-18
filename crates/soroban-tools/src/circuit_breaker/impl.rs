@@ -42,11 +42,7 @@ macro_rules! impl_circuit_breaker_state_machine {
                     sm.set_state($env, &false); // Default circuit state is closed (false).
                 }
                 $instance.on_guard($env, &sm);
-                match sm.get_state(&$env) {
-                    Some(current_state) if current_state != $state_key =>
-                        panic!("Expected state {:?} but got {:?}", current_state, $state_key),
-                    _ => {}
-                }
+                assert_eq!(sm.get_state(&$env).unwrap(), $state_key);
                 $instance.on_effect($env, &sm);
             }
     };

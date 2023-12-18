@@ -44,12 +44,8 @@ pub fn commit(attr: TokenStream, input: TokenStream) -> TokenStream {
             _ => quote! { env.storage().instance() },
         };
         quote! {
-            if !#storage.has::<BytesN<32>>(&#hash_expr) {
-                #storage.set::<BytesN<32>, i32>(&#hash_expr, &0i32);
-            }
-            else {
-                panic!("Failed to commit");
-            }
+            assert!(!#storage.has::<BytesN<32>>(&#hash_expr));
+            #storage.set::<BytesN<32>, i32>(&#hash_expr, &0i32);
         }
     };
 
@@ -113,16 +109,12 @@ pub fn reveal(attr: TokenStream, input: TokenStream) -> TokenStream {
             let computed_hash = match #hash_func_name {
                 "sha256" => env.crypto().sha256(&#data_expr),
                 "keccak256" => env.crypto().keccak256(&#data_expr),
-                _ => panic!("Invalid hash function")
+                _ => unimplemented!()
             };
 
-            if !#storage.has::<BytesN<32>>(&computed_hash) {
-                panic!("Failed to reveal");
-            }
-            else {
-                if #remove {
-                    #storage.remove::<BytesN<32>>(&computed_hash);
-                }
+            assert!(#storage.has::<BytesN<32>>(&computed_hash));
+            if #remove {
+                #storage.remove::<BytesN<32>>(&computed_hash);
             }
         }
     };
