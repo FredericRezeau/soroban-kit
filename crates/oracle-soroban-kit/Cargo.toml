@@ -1,11 +1,11 @@
 [package]
-name = "hello-soroban-kit"
+name = "oracle-soroban-kit"
 version = "0.1.8"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
-description = "Demo soroban smart contract for soroban-kit."
+description = "Demo oracle soroban smart contract for soroban-kit."
 repository = "https://github.com/fredericrezeau/soroban-kit"
-keywords = ["soroban", "stellar", "blockchain", "smart-contract", "web3"]
+keywords = ["soroban", "stellar", "oracle", "smart-contract", "web3"]
 license-file = "LICENSE"
 
 [lib]
@@ -18,13 +18,7 @@ soroban-sdk = "20.0.0"
 path = "../soroban-kit"
 version = "0.1.8"
 default-features = false
-features = [
-    "commitment-scheme",
-    "storage",
-    "state-machine",
-    "circuit-breaker",
-    "oracle",
-]
+features = ["oracle"]
 
 [dev_dependencies]
 soroban-sdk = { version = "20.0.0", features = ["testutils"] }

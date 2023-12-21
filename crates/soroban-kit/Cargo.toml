@@ -1,6 +1,6 @@
 [package]
 name = "soroban-kit"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development."
@@ -13,18 +13,25 @@ doctest = false
 
 [dependencies.soroban-macros]
 path = "../soroban-macros"
-version = "0.1.7"
+version = "0.1.8"
 optional = true
 default-features = false
 
 [dependencies.soroban-tools]
 path = "../soroban-tools"
-version = "0.1.7"
+version = "0.1.8"
 optional = true
 default-features = false
 
 [features]
-default = ["commitment-scheme", "storage", "state-machine", "circuit-breaker"]
+default = [
+    "commitment-scheme",
+    "storage",
+    "state-machine",
+    "circuit-breaker",
+    "oracle",
+]
+oracle = ["soroban-macros/oracle", "soroban-tools/oracle"]
 commitment-scheme = [
     "soroban-macros/commitment-scheme",
     "soroban-tools/commitment-scheme",

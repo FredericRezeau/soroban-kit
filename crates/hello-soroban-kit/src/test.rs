@@ -8,21 +8,31 @@
 
 extern crate std;
 use core::panic::AssertUnwindSafe;
-use std::panic::catch_unwind;
-use std::println;
-
 use soroban_sdk::{
-    bytes, contract, contractimpl, contracttype, symbol_short, testutils::Address as _, vec,
-    Address, Bytes, BytesN, Env, Symbol, Vec,
+    bytes, contract, contractimpl, contracttype, symbol_short,
+    testutils::Address as _,
+    token::{Client as TokenClient, StellarAssetClient as TokenAdminClient},
+    vec, Address, Bytes, BytesN, Env, Symbol, Vec,
 };
+
+use std::{panic::catch_unwind, println};
 
 use soroban_kit::{
-    commit, fsm, fsm::StateMachine, key_constraint, reveal, soroban_tools, state_machine, storage,
-    when_closed, when_opened, CircuitBreaker, TransitionHandler,
+    commit, fsm,
+    fsm::StateMachine,
+    key_constraint,
+    oracle::{Envelope, Events},
+    oracle_subscriber, reveal, soroban_tools, state_machine, storage, when_closed, when_opened,
+    CircuitBreaker, TransitionHandler,
 };
 
-#[contract]
-pub struct TestContract;
+fn create_token_contract<'a>(e: &Env, admin: &Address) -> (TokenClient<'a>, TokenAdminClient<'a>) {
+    let contract_address = e.register_stellar_asset_contract(admin.clone());
+    (
+        TokenClient::new(e, &contract_address),
+        TokenAdminClient::new(e, &contract_address),
+    )
+}
 
 // Use `key_constraint` to apply a constraint to the Key.
 #[contracttype]
@@ -272,6 +282,112 @@ impl Circuit {
     fn set_opened_for_addr(&self, env: &Env, addr: &Address) {}
 }
 
+// Oracle service module.
+pub mod oracle_service {
+    use soroban_kit::{oracle::Envelope, oracle::Events, oracle_broker};
+    use soroban_sdk::{
+        contract, contractimpl, contracttype, symbol_short, token, Address, Bytes, Env, Symbol, Vec,
+    };
+
+    const PAYMENT_TOKEN: Symbol = symbol_short!("TOKEN");
+
+    #[contracttype]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub enum Key {
+        Synchronous,
+    }
+
+    #[contract]
+    #[oracle_broker(Address, Bytes)]
+    pub struct TestBrokerContract;
+
+    #[contractimpl]
+    impl TestBrokerContract {
+        pub fn set_token(env: Env, token: Address) {
+            env.storage().instance().set(&PAYMENT_TOKEN, &token);
+        }
+    }
+
+    impl Events<Address, Bytes> for TestBrokerContract {
+        fn on_subscribe(env: &Env, topic: &Address, envelope: &Envelope) -> Option<Bytes> {
+            super::println!("on_subscribe {:?} {:?}", *topic, *envelope);
+
+            // e.g., Take a fee from subscriber.
+            envelope.subscriber.require_auth();
+            let token_addr = env
+                .storage()
+                .instance()
+                .get::<_, Address>(&PAYMENT_TOKEN)
+                .unwrap();
+            let token = token::Client::new(&env, &token_addr);
+            token.transfer(
+                &envelope.subscriber,
+                &env.current_contract_address(),
+                &10000000,
+            );
+
+            let mut envelopes = if env.storage().instance().has::<Address>(topic) {
+                env.storage()
+                    .instance()
+                    .get::<Address, Vec<Envelope>>(topic)
+                    .unwrap()
+            } else {
+                Vec::new(env)
+            };
+
+            // Support for synchronous messaging is possible by
+            // returning the data directly on subscription.
+            if env.storage().instance().has(&Key::Synchronous) {
+                env.storage().instance().get::<_, Bytes>(&Key::Synchronous)
+            } else {
+                envelopes.push_back(envelope.clone());
+                env.storage()
+                    .instance()
+                    .set::<Address, Vec<Envelope>>(topic, &envelopes);
+                None
+            }
+        }
+
+        fn on_publish(
+            env: &Env,
+            topic: &Address,
+            data: &Bytes,
+            _publisher: &Address,
+        ) -> Vec<Envelope> {
+            super::println!("on_publish {:?}", *topic);
+            let envelopes = env
+                .storage()
+                .instance()
+                .get::<Address, Vec<Envelope>>(topic)
+                .unwrap();
+            env.storage().instance().remove::<Address>(topic);
+            env.storage().instance().set(&Key::Synchronous, data);
+            envelopes
+        }
+    }
+}
+
+#[contract]
+#[oracle_subscriber(Address, Bytes)]
+pub struct TestContract;
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum OracleClientKey {
+    Data,
+}
+
+impl Events<Address, Bytes> for TestContract {
+    fn on_request(_env: &Env, _topic: &Address, envelope: &Envelope) {
+        envelope.subscriber.require_auth();
+    }
+
+    fn on_async_receive(env: &Env, _topic: &Address, _envelope: &Envelope, data: &Bytes) {
+        assert_eq!(*data, bytes!(&env, [1, 2, 3]));
+        env.storage().instance().set(&OracleClientKey::Data, data);
+    }
+}
+
 #[contractimpl]
 impl TestContract {
     pub fn hello_circuit_breaker(env: Env) {
@@ -342,7 +458,7 @@ impl TestContract {
         // soroban-kit `commit` and `reveal` macros facilitate the implementation of the commitment scheme
         // in Soroban smart contracts.
 
-        // Additionally, the soroban-kit `state-machine` macro is used to model the game's state transitions
+        // Additionally, the soroban-kit `state_machine` macro is used to model the game's state transitions
         // with concurrency and extended states to allow players to play in any order.
 
         // First, we initialize two player accounts.
@@ -462,6 +578,13 @@ impl TestContract {
             storage::get(&env, &key).unwrap().newcomer,
         ]
     }
+
+    pub fn hello_oracle(env: Env) -> Bytes {
+        env.storage()
+            .instance()
+            .get::<_, Bytes>(&OracleClientKey::Data)
+            .unwrap()
+    }
 }
 
 #[test]
@@ -488,4 +611,52 @@ fn test_soroban_kit_hello_circuit_breaker() {
     let env = Env::default();
     TestContractClient::new(&env, &env.register_contract(None, TestContract))
         .hello_circuit_breaker();
+}
+
+#[test]
+fn test_oracle() {
+    let env = Env::default();
+    env.mock_all_auths();
+    let broker = oracle_service::TestBrokerContractClient::new(
+        &env,
+        &env.register_contract(None, oracle_service::TestBrokerContract),
+    );
+
+    let topic = Address::generate(&env);
+
+    let subscriber1 = Address::generate(&env);
+    let subscriber2 = Address::generate(&env);
+    let subscriber3 = Address::generate(&env);
+
+    let (payment_token, payment_token_admin) =
+        create_token_contract(&env, &Address::generate(&env));
+    broker.set_token(&payment_token.address);
+
+    payment_token_admin.mint(&subscriber1, &10000000000);
+    payment_token_admin.mint(&subscriber2, &10000000000);
+    payment_token_admin.mint(&subscriber3, &10000000000);
+
+    let client1 = TestContractClient::new(&env, &env.register_contract(None, TestContract));
+    let client2 = TestContractClient::new(&env, &env.register_contract(None, TestContract));
+    let client3 = TestContractClient::new(&env, &env.register_contract(None, TestContract));
+
+    // Data has not been published.
+    assert_eq!(client1.request(&topic, &subscriber1, &broker.address), None);
+    assert_eq!(client2.request(&topic, &subscriber2, &broker.address), None);
+
+    let publisher = Address::generate(&env);
+    broker.publish(&topic, &publisher, &bytes!(&env, [1, 2, 3]));
+
+    // The data should now be available to the clients.
+    assert_eq!(client1.hello_oracle(), bytes!(&env, [1, 2, 3]));
+    assert_eq!(client2.hello_oracle(), bytes!(&env, [1, 2, 3]));
+
+    // After publishing, clients should be able to get the
+    // results synchronously from this oracle broker.
+    assert_eq!(
+        client3
+            .request(&topic, &subscriber3, &broker.address)
+            .unwrap(),
+        bytes!(&env, [1, 2, 3])
+    );
 }

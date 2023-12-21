@@ -11,7 +11,7 @@
 /// This test demonstrates the use of the commitment scheme to implement a polling station
 /// in a smart contract with soroban-kit `commit` and `reveal` macros.
 ///
-/// Additionally, soroban-kit `state-machine` macro is used to model the state transitions
+/// Additionally, soroban-kit `state_machine` macro is used to model the state transitions
 /// with concurrency and extended states to allow multiple voters to vote in any order.
 #[cfg(feature = "commitment-scheme")]
 mod tests {

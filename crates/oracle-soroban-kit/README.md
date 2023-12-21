@@ -1,13 +1,13 @@
 [![MIT License][license-shield]][license-url]
 [![Twitter][twitter-shield]][twitter-url]
 
-# hello-soroban-kit
+# oracle-soroban-kit
 ![Build Status](https://github.com/FredericRezeau/soroban-kit/actions/workflows/rust.yml/badge.svg)
 [![Current Crates.io Version](https://img.shields.io/crates/v/soroban-kit.svg)](https://crates.io/crates/soroban-kit)
 
 This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/soroban-kit) | [crates.io](https://crates.io/crates/soroban-kit).
 
-`hello-soroban-kit` is a Soroban smart contract demo showcasing the use of all features in `soroban-kit` including `state-machine`, `commitment-scheme`, `circuit-breaker`, `oracle` and `storage`.
+`oracle-soroban-kit` implements a simple demo **oracle broker** charging a fee from subscribers for each data request. It uses of the `oracle` feature in `soroban-kit`.
 
 `soroban-kit` is designed for compactness, focusing on slim constructs. It is built on Rust's dependency-free `core` library and the `soroban-sdk`. All modules are feature-gated, offering you the flexibility to compile only the components essential for your project.
 
@@ -33,31 +33,13 @@ Take a look at [Litemint Smart Contracts]([src/lib.rs](https://github.com/litemi
    ```
 4. Invoking the contract:
    
-   Just say hello with storage type-safety!
+   Publish data
    ```sh
-   soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- hello --newcomer TESTER
+   soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- publish --publisher ACCOUNT --topic 00 --data 00
    ```
    ```sh
-   output > ["Hello","TESTER"]
+   output > TODO
    ```
-
-   Play rock paper scissors!
-   ```sh
-   soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- rock_paper_scissors
-   ```
-   ```sh
-   output > "Success"
-   ```
-
-   Flip the switch on a circuit!
-   ```sh
-   soroban contract invoke --id CONTRACT_ID --source ACCOUNT --rpc-url https://soroban-testnet.stellar.org:443 --network-passphrase "Test SDF Network ; September 2015" -- circuit_breaker
-   ```
-   ```sh
-   output > "Success"
-   ```
-5. Check out [lib.rs](src/lib.rs) and [test.rs](src/test.rs) for detailed integration examples.
-   
 
 ## Contributing
 

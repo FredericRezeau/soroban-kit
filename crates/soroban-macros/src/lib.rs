@@ -11,6 +11,10 @@ extern crate proc_macro;
 #[allow(unused_imports)]
 use proc_macro::TokenStream;
 
+/// Oracle macros implementation.
+#[cfg(feature = "oracle")]
+mod oracle;
+
 /// Commitment scheme macros implementation.
 #[cfg(feature = "commitment-scheme")]
 mod commit;
@@ -79,4 +83,16 @@ pub fn when_closed(attr: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_derive(CircuitBreaker)]
 pub fn circuit_breaker_derive(input: TokenStream) -> TokenStream {
     circuit_breaker::derive(input)
+}
+
+#[cfg(feature = "oracle")]
+#[proc_macro_attribute]
+pub fn oracle_subscriber(attr: TokenStream, input: TokenStream) -> TokenStream {
+    oracle::oracle_subscriber_attribute(attr, input)
+}
+
+#[cfg(feature = "oracle")]
+#[proc_macro_attribute]
+pub fn oracle_broker(attr: TokenStream, input: TokenStream) -> TokenStream {
+    oracle::oracle_broker_attribute(attr, input)
 }

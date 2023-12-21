@@ -7,6 +7,9 @@
     MIT License
 */
 
+#[cfg(feature = "oracle")]
+pub mod oracle;
+
 #[cfg(feature = "state-machine")]
 pub mod fsm;
 

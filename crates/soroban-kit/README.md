@@ -17,18 +17,22 @@ Licensed under MIT. This software is provided "AS IS", no liability assumed. [Mo
       - [Background](#background)
       - [Documentation](#documentation)
       - [Examples](#examples)
-    - [Commitment Scheme](#commitment-scheme)
+    - [Oracle](#oracle)
       - [Background](#background-1)
       - [Documentation](#documentation-1)
       - [Examples](#examples-1)
-    - [Circuit Breaker](#circuit-breaker)
+    - [Commitment Scheme](#commitment-scheme)
       - [Background](#background-2)
       - [Documentation](#documentation-2)
       - [Examples](#examples-2)
-    - [Type Safe Storage](#type-safe-storage)
+    - [Circuit Breaker](#circuit-breaker)
       - [Background](#background-3)
       - [Documentation](#documentation-3)
       - [Examples](#examples-3)
+    - [Type Safe Storage](#type-safe-storage)
+      - [Background](#background-4)
+      - [Documentation](#documentation-4)
+      - [Examples](#examples-4)
   - [Smart Contract Demo](#smart-contract-demo)
   - [Contributing](#contributing)
   - [License](#license)
@@ -41,22 +45,22 @@ Licensed under MIT. This software is provided "AS IS", no liability assumed. [Mo
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.7", default-features = false, features = ["state-machine"] }
+soroban-kit = { version = "0.1.8", default-features = false, features = ["state-machine"] }
 ```
 
-The `state-machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions (composite states), runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
+The `state_machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions (composite states), runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
 
 #### Background
 
 While state machines are a prevalent behavioral pattern in Solidity smart contracts, their implementation is often limited due to Solidity rigid architecture leading to complexities, and sometimes impossibilities, in implementing concurrency and runtime behaviors.
 
-Leveraging Rust advanced type system, soroban-kit `state-machine` can handle complex interactions and concurrent state executions, enabling a flexible, yet straightforward state machine solution for Soroban smart contracts.
+Leveraging Rust advanced type system, soroban-kit `state_machine` can handle complex interactions and concurrent state executions, enabling a flexible, yet straightforward state machine solution for Soroban smart contracts.
 
 #### Documentation
 
 Configure a function for state transition within your finite state machine.
 
-`#[state-machine]` options:
+`#[state_machine]` options:
 - `state`: StatePath := EnumName ":" VariantName [":" TupleVariableName]
 - `region`: RegionPath := EnumName ":" VariantName [":" TupleVariableName]
 - `storage`: "instance" (default) | "persistent" | "temporary"
@@ -91,15 +95,73 @@ impl MyStateMachine {
 - [Game Lobby Example](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/state-machine-tests.rs)
 - [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
 
+### Oracle
+
+The `oracle_broker` and `oracle_subscriber` attribute macros are designed to generalize interfacing for both asynchronous and synchronous cross-contract communication. Leveraging the publisher-subscriber pattern, the system allows subscribers to establish multiple connections to oracle broker contracts and *vice-versa*.
+
+These macros generate a lightweight framework (see [oracle.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/src/oracle.rs)) ensuring consistency for communication and events-driven interactions (see [impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/oracle/impl.rs)). `topic` and `data` types are customizable via macro arguments, you can use any user-defined and built-in Soroban types.
+
+#### Background
+
+Oracles serve as bridges between blockchains and external data sources. There are many key challenges in implementing Oracle services, including decentralization, synchronicity, decoupling and multiplicity.
+
+`soroban-kit` proposes a lightweight solution for implementing the *pub/sub* messaging pattern to help address these challenges fro cross-contract communication.
+
+See the [oracle-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/oracle-soroban-kit) contract for a basic oracle broker implementation showcasing fee collection from subscribers, with the ability to serve data both synchronously and asynchronously based on availability.
+
+#### Documentation
+
+`#[oracle_broker]` options (positional arguments):
+- `Topic Type`: Built-in or Custom type
+- `Data Type`: Built-in or Custom type
+```rust
+    // Implement the oracle broker interface for your contract.
+    #[contract]
+    #[oracle_broker(Bytes, MyDataType)]
+    pub struct OracleContract;
+```
+
+`#[oracle_subscriber]` options (positional arguments):
+- `Topic Type`: Built-in or Custom type
+- `Data Type`: Built-in or Custom type
+```rust
+    // Implement the oracle subscriber interface for your contract.
+    #[contract]
+    #[oracle_subscriber(Bytes, MyDataType)]
+    pub struct TestContract;
+```
+
+The framework allows you to handle various events via the `oracle:Events` trait implementation:
+
+```rust
+    // Example, receiving data asynchronously.
+    fn on_async_receive(env: &Env, topic: &Bytes, envelope: &oracle::Envelope, data: &Message) {
+        // Only allow whitelisted oracle broker.
+        assert_eq!(
+            storage::get(&env, &WhitelistKey::Broker).unwrap().broker,
+            envelope.broker
+        );
+        // Make sure the broker is authorized (i.e., made the cross-contract call).
+        envelope.broker.require_auth();
+        // Set the data.
+        storage::set(&env, &MessageKey::Topic(topic.clone()), &data);
+    }
+```
+
+#### Examples
+
+- [oracle-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/oracle-soroban-kit)
+- [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
+
 ### Commitment Scheme
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.7", default-features = false, features = ["commitment-scheme"] }
+soroban-kit = { version = "0.1.8", default-features = false, features = ["commitment-scheme"] }
 ```
 The `commit` and `reveal` attribute macros are designed to easily implement the commitment scheme in your Soroban smart contract. They use the soroban-sdk _sha256_ or _keccak256_ hash functions and storage with automatic hash removal.
 
-These attributes can also be paired with the `state-machine` attribute to manage the commitment and reveal phases for multiple parties. For a comprehensive demo of such pairing, refer to the [Polling Station](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs) example.
+These attributes can also be paired with the `state_machine` attribute to manage the commitment and reveal phases for multiple parties. For a comprehensive demo of such pairing, refer to the [Polling Station](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/commit-reveal-tests.rs) example.
 
 ```rust
         #[commit]
@@ -152,7 +214,7 @@ The `commit` and `reveal` macros in `soroban-kit` allow a boilerplate-free imple
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.7", default-features = false, features = ["circuit-breaker"] }
+soroban-kit = { version = "0.1.8", default-features = false, features = ["circuit-breaker"] }
 ```
 
 The `when_opened` and `when_closed` attribute macros provide a streamlined way to integrate the circuit breaker pattern into your Soroban smart contracts.
@@ -216,7 +278,7 @@ Control state transitions with guards and effects.
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.7", default-features = false, features = ["storage"] }
+soroban-kit = { version = "0.1.8", default-features = false, features = ["storage"] }
 ```
 
 The `storage` and `key_constraint` macros generate a minimal wrapper (see [storage/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.

@@ -7,7 +7,7 @@
 */
 
 use soroban_kit::{key_constraint, soroban_tools, storage};
-use soroban_sdk::{contracttype, Env, Symbol};
+use soroban_sdk::{contracttype, Address, Bytes, Env, Symbol};
 
 // Optional but recommended.
 // Use `key_constraint` to apply a constraint to the Key
@@ -66,4 +66,34 @@ pub enum Phase {
 pub enum Domain {
     Players(Player),
     Game,
+}
+
+#[key_constraint(MessageKeyConstraint)]
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum MessageKey {
+    Topic(Bytes),
+    AuthorizedBroker,
+}
+
+#[storage(Instance, MessageKeyConstraint)]
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Message {
+    pub data: Bytes,
+    pub timestamp: u64,
+}
+
+#[key_constraint(WhitelistKeyConstraint)]
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum WhitelistKey {
+    Broker,
+}
+
+#[storage(Instance, WhitelistKeyConstraint)]
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Whitelist {
+    pub broker: Address,
 }
