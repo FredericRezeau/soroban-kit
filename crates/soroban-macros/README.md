@@ -107,7 +107,7 @@ These macros generate a lightweight framework (see [oracle.rs](https://github.co
 
 Oracles serve as bridges between blockchains and external data sources. There are many key challenges in implementing Oracle services, including decentralization, synchronicity, decoupling and multiplicity.
 
-`soroban-kit` proposes a lightweight solution for implementing the *pub/sub* messaging pattern to help address these challenges fro cross-contract communication.
+`soroban-kit` proposes a lightweight solution for implementing the *pub/sub* messaging pattern to help address these challenges for cross-contract communication.
 
 See the [oracle-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/oracle-soroban-kit) contract for a basic oracle broker implementation showcasing fee collection from subscribers, with the ability to serve data both synchronously and asynchronously based on availability.
 
