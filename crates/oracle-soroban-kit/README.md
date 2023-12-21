@@ -7,11 +7,11 @@
 
 This crate is part of `soroban-kit`: [Github](https://github.com/FredericRezeau/soroban-kit) | [crates.io](https://crates.io/crates/soroban-kit).
 
-`oracle-soroban-kit` implements a simple demo **oracle broker** charging a fee from subscribers for each data request. It uses of the `oracle` feature in `soroban-kit`.
+`oracle-soroban-kit` implements a simple demo **oracle broker** charging a fee from subscribers for each data request. It uses the `oracle` feature in `soroban-kit`.
 
 `soroban-kit` is designed for compactness, focusing on slim constructs. It is built on Rust's dependency-free `core` library and the `soroban-sdk`. All modules are feature-gated, offering you the flexibility to compile only the components essential for your project.
 
-Take a look at [Litemint Smart Contracts]([src/lib.rs](https://github.com/litemint/litemint-soroban-contracts)) to see an integration of the library in real-world smart contracts.
+Take a look at [Litemint Smart Contracts](https://github.com/litemint/litemint-soroban-contracts) to see an integration of the library in real-world smart contracts.
 
 ## Commands
 
