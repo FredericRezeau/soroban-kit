@@ -1,6 +1,6 @@
 [package]
 name = "soroban-tools"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Fast, lightweight functions and macros with lean, targeted functionality for Soroban smart contract development."
@@ -28,10 +28,12 @@ default = [
     "state-machine",
     "circuit-breaker",
     "oracle",
+    "utils",
 ]
 oracle = []
 commitment-scheme = []
 storage = []
 state-machine = []
 circuit-breaker = ["state-machine"]
+utils = []
 mock-storage = ["storage"]

@@ -10,6 +10,11 @@
     Author: Fred Kyung-jin Rezeau <fred@litemint.com>
 */
 
-#[macro_use]
-mod r#impl;
-pub use r#impl::*;
+/// A rudimentary mock storage allowing testing and profiling.
+/// outside of Soroban environment.
+/// `cargo test --features mock-storage`
+#[cfg(feature = "mock-storage")]
+mod mock_storage;
+
+#[cfg(feature = "mock-storage")]
+pub use mock_storage::*;

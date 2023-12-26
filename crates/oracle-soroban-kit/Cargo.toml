@@ -1,6 +1,6 @@
 [package]
 name = "oracle-soroban-kit"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Demo oracle soroban smart contract for soroban-kit."
@@ -16,7 +16,7 @@ soroban-sdk = "20.0.0"
 
 [dependencies.soroban-kit]
 path = "../soroban-kit"
-version = "0.1.8"
+version = "0.1.9"
 default-features = false
 features = ["oracle"]
 

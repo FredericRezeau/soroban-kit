@@ -1,9 +1,13 @@
 /*
-    Date: 2023
-    Author: Fred Kyung-jin Rezeau <fred@litemint.com>
-    Copyright (c) 2023 Litemint LLC
+    Copyright (c) 2023-2024 Frederic Kyung-jin Rezeau (오경진 吳景振)
 
-    MIT License
+    This file is part of soroban-kit.
+
+    Licensed under the MIT License, this software is provided "AS IS",
+    no liability assumed. For details, see the LICENSE file in the
+    root directory.
+
+    Author: Fred Kyung-jin Rezeau <fred@litemint.com>
 */
 
 /// Integration tests for the soroban-macros state-machine module (`fsm`).

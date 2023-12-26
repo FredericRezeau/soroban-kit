@@ -35,6 +35,7 @@ Licensed under MIT. This software is provided "AS IS", no liability assumed. [Mo
       - [Background](#background-4)
       - [Documentation](#documentation-4)
       - [Examples](#examples-4)
+    - [Utils](#utils)
   - [Smart Contract Demo](#smart-contract-demo)
   - [Contributing](#contributing)
   - [License](#license)
@@ -47,7 +48,7 @@ Licensed under MIT. This software is provided "AS IS", no liability assumed. [Mo
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.8", default-features = false, features = ["state-machine"] }
+soroban-kit = { version = "0.1.9", default-features = false, features = ["state-machine"] }
 ```
 
 The `state_machine` attribute macro can be used to implement versatile state machines (see [fsm/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/fsm/impl.rs)) in Soroban smart contracts. It features state concurrency through regions (composite states), runtime behavior modeling via extended state variables, transition control with guards and effects, and state persistence with Soroban storage.
@@ -159,7 +160,7 @@ The framework allows you to handle various events via the `oracle:Events` trait 
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.8", default-features = false, features = ["commitment-scheme"] }
+soroban-kit = { version = "0.1.9", default-features = false, features = ["commitment-scheme"] }
 ```
 The `commit` and `reveal` attribute macros are designed to easily implement the commitment scheme in your Soroban smart contract. They use the soroban-sdk _sha256_ or _keccak256_ hash functions and storage with automatic hash removal.
 
@@ -216,7 +217,7 @@ The `commit` and `reveal` macros in `soroban-kit` allow a boilerplate-free imple
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.8", default-features = false, features = ["circuit-breaker"] }
+soroban-kit = { version = "0.1.9", default-features = false, features = ["circuit-breaker"] }
 ```
 
 The `when_opened` and `when_closed` attribute macros provide a streamlined way to integrate the circuit breaker pattern into your Soroban smart contracts.
@@ -280,7 +281,7 @@ Control state transitions with guards and effects.
 
 ```toml
 [dependencies]
-soroban-kit = { version = "0.1.8", default-features = false, features = ["storage"] }
+soroban-kit = { version = "0.1.9", default-features = false, features = ["storage"] }
 ```
 
 The `storage` and `key_constraint` macros generate a minimal wrapper (see [storage/impl.rs](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-tools/src/storage/impl.rs)) for type safety with storage operations while also enforcing type rules at compile time, binding Soroban storage, data types and keys. For performance, the generated code handles key and data operations without duplication, leveraging Rust lifetimes for safe borrowing.
@@ -319,6 +320,17 @@ The `storage` macros streamline this process by automatically generating the boi
 - [Walkthrough Video](https://www.youtube.com/watch?v=YZbI0MnyskE)
 - [Integration Tests](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/soroban-macros/tests/storage-tests.rs)
 - [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
+
+### Utils
+
+```toml
+[dependencies]
+soroban-kit = { version = "0.1.9", default-features = false, features = ["utils"] }
+```
+
+This module contains utility macros including:
+
+-  `reflective_enum`: enables *C-style* enums to reflect their own variants.
 
 ## Smart Contract Demo
 

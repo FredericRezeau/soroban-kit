@@ -1,9 +1,13 @@
 /*
-    Date: 2023
-    Author: Fred Kyung-jin Rezeau <fred@litemint.com>
-    Copyright (c) 2023 Litemint LLC
+    Copyright (c) 2023-2024 Frederic Kyung-jin Rezeau (오경진 吳景振)
 
-    MIT License
+    This file is part of soroban-kit.
+
+    Licensed under the MIT License, this software is provided "AS IS",
+    no liability assumed. For details, see the LICENSE file in the
+    root directory.
+
+    Author: Fred Kyung-jin Rezeau <fred@litemint.com>
 */
 
 /// Integration tests for the commitment-scheme macros module (`commit`).
@@ -22,33 +26,21 @@ mod tests {
     use core::panic::AssertUnwindSafe;
     use soroban_sdk::{
         bytes, contract, contractimpl, contracttype, symbol_short, vec, Bytes, BytesN, Env, Symbol,
-        Vec,
     };
 
-    use soroban_macros::{commit, key_constraint, reveal, state_machine, storage};
+    use soroban_macros::{commit, reveal, state_machine, storage};
     use soroban_tools::{
         fsm::{self, StateMachine, TransitionHandler},
-        storage,
+        storage, reflective_enum
     };
 
     use std::panic::catch_unwind;
 
-    macro_rules! create_voters {
-        ($($variant:ident),+) => {
-            #[key_constraint(VoterConstraint)]
-            #[contracttype]
-            #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-            pub enum Voter {
-                $($variant),+
-            }
-            impl Voter {
-                pub fn all(env: &Env) -> Vec<Voter> {
-                    vec![env, $(Voter::$variant),+]
-                }
-            }
-        };
+    reflective_enum! {
+        Voter {
+            Alice, Bob, Charlie
+        }
     }
-    create_voters!(Alice, Bob, Charlie);
 
     #[contracttype]
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -67,7 +59,7 @@ mod tests {
         Station,
     }
 
-    #[storage(Instance, VoterConstraint)]
+    #[storage(Instance)]
     #[contracttype]
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct RevealedVote {
@@ -95,7 +87,7 @@ mod tests {
         #[state_machine(state = "Phase:Closed", region = "Domain:Station")]
         fn count(&self, env: &Env) {
             // Iterate through all voters...
-            let voters = Voter::all(env);
+            let voters = Voter::get_values(env);
             for voter in voters.iter() {
                 println!("Result: {:?} voted {:?}", voter, storage::get(env, &voter));
             }
@@ -115,7 +107,7 @@ mod tests {
         fn on_effect(&self, env: &Env, state_machine: &StateMachine<Domain, Phase>) {
             let domain = state_machine.get_region();
             let phase = state_machine.get_state(&env).unwrap();
-            let voters = Voter::all(env);
+            let voters = Voter::get_values(env);
             if let Domain::Booth(current_voter) = domain {
                 if let Some(voter) = voters.iter().find(|v| v == current_voter) {
                     match phase {
