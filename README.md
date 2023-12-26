@@ -151,6 +151,7 @@ The framework allows you to handle various events via the `oracle:Events` trait 
 
 #### Examples
 
+- [Comprehensive step-by-step deployment guide with code](https://github.com/FredericRezeau/soroban-oracle-example)
 - [oracle-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/oracle-soroban-kit)
 - [hello-soroban-kit](https://github.com/FredericRezeau/soroban-kit/blob/master/crates/hello-soroban-kit)
 
