@@ -1,6 +1,6 @@
 [package]
 name = "oracle-soroban-kit"
-version = "0.1.9"
+version = "0.1.10"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Demo oracle soroban smart contract for soroban-kit."
@@ -12,13 +12,13 @@ license-file = "LICENSE"
 crate-type = ["cdylib"]
 
 [dependencies]
-soroban-sdk = "20.0.0"
+soroban-sdk = "20.3.1"
 
 [dependencies.soroban-kit]
 path = "../soroban-kit"
-version = "0.1.9"
+version = "0.1.10"
 default-features = false
 features = ["oracle"]
 
 [dev_dependencies]
-soroban-sdk = { version = "20.0.0", features = ["testutils"] }
+soroban-sdk = { version = "20.3.1", features = ["testutils"] }
