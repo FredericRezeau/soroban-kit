@@ -1,6 +1,6 @@
 [package]
 name = "hello-soroban-kit"
-version = "0.1.10"
+version = "0.1.11"
 edition = "2021"
 authors = ["Fred Kyung-jin Rezeau <fred@litemint.com>"]
 description = "Demo soroban smart contract for soroban-kit."
@@ -12,11 +12,11 @@ license-file = "LICENSE"
 crate-type = ["cdylib"]
 
 [dependencies]
-soroban-sdk = "20.3.1"
+soroban-sdk = "20.3.2"
 
 [dependencies.soroban-kit]
 path = "../soroban-kit"
-version = "0.1.10"
+version = "0.1.11"
 default-features = false
 features = [
     "commitment-scheme",
@@ -28,4 +28,4 @@ features = [
 ]
 
 [dev_dependencies]
-soroban-sdk = { version = "20.3.1", features = ["testutils"] }
+soroban-sdk = { version = "20.3.2", features = ["testutils"] }
